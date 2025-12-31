@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu User Removal Guide - Best Practices</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ff9800;
+            padding: 20px;
+            margin: 30px;
+            border-radius: 5px;
+        }
+
+        .warning-box h3 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .warning-box ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .warning-box li {
+            margin: 8px 0;
+            color: #856404;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step h3 {
+            display: inline-block;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            position: relative;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .success-box h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .danger-box {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .danger-box h4 {
+            color: #721c24;
+            margin-bottom: 10px;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            background: #28a745;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .alternatives {
+            background: #fff3e0;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .alternatives h3 {
+            color: #e65100;
+            margin-bottom: 15px;
+        }
+
+        .alt-option {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .alt-option h4 {
+            color: #f57c00;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .emoji {
+            font-size: 1.5em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+        }
+
+        .command-explanation {
+            background: #f1f3f5;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            color: #495057;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><span class="emoji">🛡️</span> Ubuntu User Removal Guide</h1>
+            <p>Best Practices for Managing System Users (Root-Only Configuration)</p>
+        </div>
+
+        <!-- Critical Warning -->
+        <div class="warning-box">
+            <h3><span class="emoji">⚠️</span> CRITICAL WARNINGS - READ BEFORE PROCEEDING</h3>
+            <ul>
+                <li><strong>Dangerous Operation:</strong> Removing all users except root can lock you out permanently</li>
+                <li><strong>Security Risk:</strong> Root-only systems violate security best practices</li>
+                <li><strong>No Recovery:</strong> Without a backup user, system recovery becomes extremely difficult</li>
+                <li><strong>Audit Trail:</strong> Root-only access makes it impossible to track individual user actions</li>
+                <li><strong>Backup Required:</strong> Always have physical/console access or a recovery method</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <!-- Pre-requisites -->
+            <div class="section">
+                <h2><span class="emoji">📋</span> Pre-Requisites Checklist</h2>
+                <ul class="checklist">
+                    <li>Have physical or console access to the server</li>
+                    <li>Have a complete system backup</li>
+                    <li>Know the root password or can set it</li>
+                    <li>Understand the security implications</li>
+                    <li>Have documented all critical services and their dependencies</li>
+                </ul>
+            </div>
+
+            <!-- Step 1: List Users -->
+            <div class="section">
+                <h2><span class="emoji">👥</span> Step 1: List All Users</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>View All System Users</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>cut -d: -f1 /etc/passwd</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Lists all usernames from the system password file
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>List Only Human Users (UID ≥ 1000)</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Filters out system accounts, showing only regular users
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Check Currently Logged-In Users</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>who
+w
+last | head -20</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Shows active sessions and recent login history
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4>💡 Understanding User Types</h4>
+                    <table>
+                        <tr>
+                            <th>User Type</th>
+                            <th>UID Range</th>
+                            <th>Purpose</th>
+                            <th>Can Delete?</th>
+                        </tr>
+                        <tr>
+                            <td>Root</td>
+                            <td>0</td>
+                            <td>System administrator</td>
+                            <td>❌ Never</td>
+                        </tr>
+                        <tr>
+                            <td>System Users</td>
+                            <td>1-999</td>
+                            <td>Service accounts (www-data, mysql, etc.)</td>
+                            <td>❌ Don't delete</td>
+                        </tr>
+                        <tr>
+                            <td>Regular Users</td>
+                            <td>1000+</td>
+                            <td>Human users</td>
+                            <td>✅ Yes (with caution)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Step 2: Enable Root Access -->
+            <div class="section">
+                <h2><span class="emoji">🔑</span> Step 2: Enable Root Access (CRITICAL)</h2>
+                
+                <div class="danger-box">
+                    <h4>⛔ DO THIS FIRST - Or You'll Lock Yourself Out!</h4>
+                    <p>Before removing any users, ensure root access is properly configured.</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Set Root Password</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>sudo passwd root</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Sets or changes the root password. Use a strong, memorable password.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Test Root Login (Console/TTY)</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Open a new terminal (DO NOT close your current session)
+# Press Ctrl+Alt+F2 to switch to TTY2
+# Login as: root
+# Password: [your root password]
+
+# If successful, return to GUI with Ctrl+Alt+F1 or F7</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Verifies root login works before making changes
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Enable Root SSH Login (If Using Remote Access)</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Edit SSH configuration
+sudo nano /etc/ssh/sshd_config
+
+# Find and change/add this line:
+PermitRootLogin yes
+
+# Save (Ctrl+X, Y, Enter)
+
+# Restart SSH service
+sudo systemctl restart sshd
+
+# Verify SSH is running
+sudo systemctl status sshd</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Allows root to login via SSH (required for remote servers)
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Test Root SSH Login (DO NOT CLOSE CURRENT SESSION)</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># From another terminal/computer:
+ssh root@your-server-ip
+
+# If successful, you're ready to proceed</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Critical test - ensures you can access the system after user removal
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <h3>⚠️ Testing Checklist Before Proceeding</h3>
+                    <ul class="checklist">
+                        <li>Root password is set and tested</li>
+                        <li>Can login as root via console/TTY</li>
+                        <li>Can login as root via SSH (if applicable)</li>
+                        <li>Have kept your current session open as backup</li>
+                        <li>Have physical/console access as fallback</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 3: Switch to Root -->
+            <div class="section">
+                <h2><span class="emoji">🔄</span> Step 3: Switch to Root User</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Switch to Root Shell</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>su -
+# Enter root password when prompted
+
+# Verify you're root
+whoami
+# Should output: root
+
+# Check current directory
+pwd
+# Should output: /root</pre>
+                    </div>
+                    <div class="command-explanation">
+                        The dash (-) ensures you get root's environment variables
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4>💡 Alternative: Use sudo for each command</h4>
+                    <p>If you prefer not to switch to root shell, you can prefix each command with <code>sudo</code>:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>sudo userdel -r username</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Kill User Processes -->
+            <div class="section">
+                <h2><span class="emoji">⚙️</span> Step 4: Terminate User Processes</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Check for Running Processes</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Replace 'username' with actual username
+ps -u username
+
+# More detailed view
+ps aux | grep username</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Lists all processes owned by the user
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Kill All User Processes</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Graceful termination (recommended first)
+pkill -u username
+
+# Wait 5 seconds
+sleep 5
+
+# Force kill if processes still running
+pkill -9 -u username</pre>
+                    </div>
+                    <div class="command-explanation">
+                        First tries graceful shutdown, then forces termination if needed
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Verify Processes Are Terminated</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>ps -u username
+
+# Should return: no process found or empty result</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Confirms all user processes are stopped
+                    </div>
+                </div>
+
+                <div class="danger-box">
+                    <h4>⚠️ Common Error: "user is currently used by process"</h4>
+                    <p>If you see this error when trying to delete a user:</p>
+                    <ol>
+                        <li>The user has active processes running</li>
+                        <li>The user might be logged in</li>
+                        <li>Use the commands above to kill processes first</li>
+                        <li>Check with <code>who</code> if user is logged in</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 5: Remove Users -->
+            <div class="section">
+                <h2><span class="emoji">🗑️</span> Step 5: Remove Users</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Remove Single User (With Home Directory)</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Replace 'username' with actual username
+userdel -r username</pre>
+                    </div>
+                    <div class="command-explanation">
+                        <strong>-r flag:</strong> Removes user's home directory and mail spool
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Remove Multiple Users (Script)</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>#!/bin/bash
+# List of users to remove
+USERS="user1 user2 user3 ubuntu"
+
+for user in $USERS; do
+    echo "Processing user: $user"
+    
+    # Kill user processes
+    pkill -9 -u $user 2>/dev/null
+    
+    # Wait a moment
+    sleep 2
+    
+    # Remove user
+    userdel -r $user 2>/dev/null
+    
+    if [ $? -eq 0 ]; then
+        echo "✓ Successfully removed: $user"
+    else
+        echo "✗ Failed to remove: $user"
+    fi
+    echo "---"
+done
+
+echo "User removal complete!"</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Automated script to remove multiple users safely
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Handle "Mail Spool Not Found" Warning</h3>
+                    <div class="info-box">
+                        <h4>ℹ️ This is Normal!</h4>
+                        <p>The message <code>userdel: user mail spool (/var/mail/user) not found</code> is just a <strong>warning</strong>, not an error.</p>
+                        <p><strong>The user is still deleted successfully.</strong> This just means the user had no mail spool file.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Verify User Deletion</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Check if user exists
+id username
+# Should return: id: 'username': no such user
+
+# Check /etc/passwd
+grep username /etc/passwd
+# Should return: nothing
+
+# Check home directory
+ls -la /home/
+# username directory should be gone
+
+# List remaining users
+cut -d: -f1 /etc/passwd | grep -v "^#"</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Multiple verification methods to confirm user removal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Cleanup -->
+            <div class="section">
+                <h2><span class="emoji">🧹</span> Step 6: Post-Removal Cleanup</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Remove User Groups</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Check if group still exists
+getent group username
+
+# Remove group if exists
+groupdel username
+
+# Verify
+getent group username
+# Should return: nothing</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Removes the user's primary group if it still exists
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Find and Remove Orphaned Files</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Find files owned by deleted user (by UID)
+# First, get the UID before deleting (if you forgot)
+# Or search for files with no owner
+
+# Find orphaned files
+find / -nouser -ls 2>/dev/null
+
+# To remove them (BE CAREFUL!)
+find / -nouser -delete 2>/dev/null</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Finds and optionally removes files owned by deleted users
+                    </div>
+                    <div class="warning-box">
+                        <h3>⚠️ Warning</h3>
+                        <p>The delete command is destructive! Review the list first before deleting.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Clean Up Cron Jobs</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Check user crontabs
+ls -la /var/spool/cron/crontabs/
+
+# Remove specific user crontab if exists
+rm -f /var/spool/cron/crontabs/username
+
+# Verify
+ls -la /var/spool/cron/crontabs/</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Removes scheduled tasks belonging to deleted users
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Check and Clean Sudo Configuration</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Edit sudoers file safely
+visudo
+
+# Remove any lines containing deleted usernames
+# Example: username ALL=(ALL:ALL) ALL
+
+# Check sudo directory for user-specific files
+ls -la /etc/sudoers.d/
+
+# Remove user-specific sudo files
+rm -f /etc/sudoers.d/username</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Cleans up sudo permissions for deleted users
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <h3>Review System Logs</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Check for any errors during user removal
+journalctl -xe | grep userdel
+
+# Check auth log
+tail -50 /var/log/auth.log
+
+# Check system log
+tail -50 /var/log/syslog</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Reviews logs for any issues during the removal process
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Final Verification -->
+            <div class="section">
+                <h2><span class="emoji">✅</span> Step 7: Final Verification</h2>
+                
+                <div class="success-box">
+                    <h4>Final Checklist</h4>
+                    <ul class="checklist">
+                        <li>All intended users have been removed</li>
+                        <li>Root login works (console and SSH)</li>
+                        <li>No orphaned processes running</li>
+                        <li>Home directories are removed</li>
+                        <li>User groups are removed</li>
+                        <li>System logs show no errors</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Comprehensive System Check</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>#!/bin/bash
+echo "=== FINAL SYSTEM VERIFICATION ==="
+echo ""
+
+echo "1. Remaining Users:"
+cut -d: -f1 /etc/passwd | grep -v "^#"
+echo ""
+
+echo "2. Users with Login Shells:"
+egrep -v '(/false|/nologin)' /etc/passwd | cut -d: -f1
+echo ""
+
+echo "3. Home Directories:"
+ls -la /home/
+echo ""
+
+echo "4. Current Root Status:"
+whoami
+echo ""
+
+echo "5. SSH Root Login Status:"
+grep "PermitRootLogin" /etc/ssh/sshd_config
+echo ""
+
+echo "6. Active User Sessions:"
+who
+echo ""
+
+echo "=== VERIFICATION COMPLETE ==="</pre>
+                    </div>
+                    <div class="command-explanation">
+                        Comprehensive script to verify system state after user removal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Best Practices (Alternatives) -->
+            <div class="alternatives">
+                <h3><span class="emoji">🛡️</span> RECOMMENDED: Secure Alternatives to Root-Only Systems</h3>
+                <p>Instead of removing all users and using only root, consider these much safer alternatives:</p>
+
+                <div class="alt-option">
+                    <h4>1. SSH Key-Based Authentication</h4>
+                    <p>Disable password authentication and use SSH keys instead:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Generate SSH key (on your local machine)
+ssh-keygen -t ed25519 -C "your_email@example.com"
+
+# Copy key to server
+ssh-copy-id username@server-ip
+
+# On server, disable password auth
+sudo nano /etc/ssh/sshd_config
+# Set: PasswordAuthentication no
+# Set: PermitRootLogin no
+
+sudo systemctl restart sshd</pre>
+                    </div>
+                    <p><strong>Benefits:</strong> Much more secure than passwords, prevents brute force attacks</p>
+                </div>
+
+                <div class="alt-option">
+                    <h4>2. Dedicated Admin User with Limited Sudo</h4>
+                    <p>Create a dedicated admin user with restricted sudo access:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Create admin user
+sudo adduser sysadmin
+
+# Create sudo configuration file
+sudo visudo -f /etc/sudoers.d/sysadmin
+
+# Add specific commands only:
+sysadmin ALL=(ALL) /usr/bin/systemctl, /usr/bin/apt, /usr/sbin/service
+
+# Test
+sudo -l -U sysadmin</pre>
+                    </div>
+                    <p><strong>Benefits:</strong> Limits damage from compromised accounts, maintains audit trail</p>
+                </div>
+
+                <div class="alt-option">
+                    <h4>3. Fail2Ban for Brute Force Protection</h4>
+                    <p>Install and configure fail2ban to block repeated login attempts:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Install fail2ban
+sudo apt update
+sudo apt install fail2ban -y
+
+# Configure
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo nano /etc/fail2ban/jail.local
+
+# Enable SSH protection:
+[sshd]
+enabled = true
+maxretry = 3
+bantime = 3600
+
+# Start service
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+
+# Check status
+sudo fail2ban-client status sshd</pre>
+                    </div>
+                    <p><strong>Benefits:</strong> Automatically blocks attackers after failed attempts</p>
+                </div>
+
+                <div class="alt-option">
+                    <h4>4. Two-Factor Authentication (2FA)</h4>
+                    <p>Add an extra layer of security with Google Authenticator:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Install Google Authenticator
+sudo apt install libpam-google-authenticator -y
+
+# Setup for user
+google-authenticator
+
+# Configure SSH
+sudo nano /etc/pam.d/sshd
+# Add: auth required pam_google_authenticator.so
+
+sudo nano /etc/ssh/sshd_config
+# Set: ChallengeResponseAuthentication yes
+
+sudo systemctl restart sshd</pre>
+                    </div>
+                    <p><strong>Benefits:</strong> Even if password is compromised, attacker needs physical device</p>
+                </div>
+
+                <div class="alt-option">
+                    <h4>5. Firewall Configuration (UFW)</h4>
+                    <p>Restrict SSH access to specific IP addresses:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre># Enable UFW
+sudo ufw enable
+
+# Allow SSH only from specific IP
+sudo ufw allow from 203.0.113.0/24 to any port 22
+
+# Or allow from specific IP
+sudo ufw allow from 203.0.113.5 to any port 22
+
+# Check status
+sudo ufw status numbered
+
+# Deny all other SSH attempts (already default)
+sudo ufw default deny incoming</pre>
+                    </div>
+                    <p><strong>Benefits:</strong> Limits attack surface by restricting access to trusted IPs</p>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="section">
+                <h2><span class="emoji">🔧</span> Troubleshooting Common Issues</h2>
+
+                <div class="step">
+                    <h3>Issue 1: "Authentication failure" after user removal</h3>
+                    <div class="danger-box">
+                        <h4>Problem:</h4>
+                        <p>Cannot login after removing users</p>
+                        <h4>Solution:</h4>
+                        <ol>
+                            <li>Access system via physical console (Ctrl+Alt+F2)</li>
+                            <li>Login as root with the password you set</li>
+                            <li>Create a new user: <code>adduser newadmin</code></li>
+                            <li>Add to sudo group: <code>usermod -aG sudo newadmin</code></li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3>Issue 2: "Permission denied" for root SSH login</h3>
+                    <div class="danger-box">
+                        <h4>Problem:</h4>
+                        <p>Cannot SSH as root even after enabling it</p>
+                        <h4>Solution:</h4>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <pre># Check SSH config
+sudo grep "PermitRootLogin" /etc/ssh/sshd_config
+
+# Should show: PermitRootLogin yes
+
+# If not, edit:
+sudo nano /etc/ssh/sshd_config
+# Change to: PermitRootLogin yes
+
+# Restart SSH
+sudo systemctl restart sshd
+
+# Check SSH is running
+sudo systemctl status sshd
+
+# Check firewall
+sudo ufw status
+# Ensure port 22 is allowed</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3>Issue 3: "Device or resource busy" when removing user</h3>
+                    <div class="danger-box">
+                        <h4>Problem:</h4>
+                        <p>User has mounted filesystems or open files</p>
+                        <h4>Solution:</h4>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            <pre># Find what's keeping user busy
+lsof | grep username
+
+# Check mounted filesystems
+mount | grep username
+
+# Force kill all processes
+pkill -9 -u username
+
+# Unmount user filesystems if any
+umount /home/username
+
+# Try deletion again
+userdel -r username</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3>Issue 4: Locked out completely</h3>
+                    <div class="danger-box">
+                        <h4>Problem:</h4>
+                        <p>Cannot access system at all</p>
+                        <h4>Solution:</h4>
+                        <ol>
+                            <li><strong>Physical Access:</strong> Reboot and access GRUB menu</li>
+                            <li>Select "Advanced options" → "recovery mode"</li>
+                            <li>Select "root" - Drop to root shell</li>
+                            <li>Remount filesystem: <code>mount -o remount,rw /</code></li>
+                            <li>Create new user: <code>adduser rescue</code></li>
+                            <li>Add to sudo: <code>usermod -aG sudo rescue</code></li>
+                            <li>Reboot: <code>reboot</code></li>
+                        </ol>
+                        <p><strong>Cloud/VPS:</strong> Use provider's console/recovery mode</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Recovery -->
+            <div class="section">
+                <h2><span class="emoji">🚨</span> Emergency Recovery Procedures</h2>
+
+                <div class="danger-box">
+                    <h4>If You've Locked Yourself Out</h4>
+                    <p>Follow these steps based on your access type:</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Physical Server Recovery</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>1. Reboot the server
+2. When GRUB menu appears, press 'e' to edit
+3. Find line starting with 'linux'
+4. Add to end of line: init=/bin/bash
+5. Press Ctrl+X or F10 to boot
+6. Remount filesystem:
+   mount -o remount,rw /
+7. Reset root password:
+   passwd root
+8. Create new user:
+   adduser emergency
+   usermod -aG sudo emergency
+9. Reboot:
+   exec /sbin/init</pre>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Cloud/VPS Recovery (AWS, DigitalOcean, etc.)</h3>
+                    <ul>
+                        <li><strong>AWS EC2:</strong> Use EC2 Serial Console or detach volume and attach to another instance</li>
+                        <li><strong>DigitalOcean:</strong> Use Recovery ISO from control panel</li>
+                        <li><strong>Google Cloud:</strong> Use Serial Console or startup script</li>
+                        <li><strong>Azure:</strong> Use Serial Console or reset password via portal</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Live USB Recovery</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>1. Boot from Ubuntu Live USB
+2. Open terminal
+3. Mount your system partition:
+   sudo mkdir /mnt/system
+   sudo mount /dev/sda1 /mnt/system
+4. Chroot into your system:
+   sudo chroot /mnt/system
+5. Reset root password:
+   passwd root
+6. Create new user:
+   adduser recovery
+   usermod -aG sudo recovery
+7. Exit and reboot:
+   exit
+   sudo reboot</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentation -->
+            <div class="section">
+                <h2><span class="emoji">📝</span> Documentation & Audit Trail</h2>
+
+                <div class="info-box">
+                    <h4>Keep Records of All Changes</h4>
+                    <p>Document everything for compliance and troubleshooting:</p>
+                </div>
+
+                <div class="step">
+                    <h3>Create Change Log</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre>#!/bin/bash
+# User Removal Documentation Script
+
+LOG_FILE="/root/user_removal_$(date +%Y%m%d_%H%M%S).log"
+
+echo "=== USER REMOVAL DOCUMENTATION ===" | tee -a $LOG_FILE
+echo "Date: $(date)" | tee -a $LOG_FILE
+echo "Performed by: $(whoami)" | tee -a $LOG_FILE
+echo "" | tee -a $LOG_FILE
+
+echo "Users before removal:" | tee -a $LOG_FILE
+cut -d: -f1 /etc/passwd | tee -a $LOG_FILE
+echo "" | tee -a $LOG_FILE
+
+echo "Users to be removed: $1" | tee -a $LOG_FILE
+echo "" | tee -a $LOG_FILE
+
+# Perform removal here...
+
+echo "Users after removal:" | tee -a $LOG_FILE
+cut -d: -f1 /etc/passwd | tee -a $LOG_FILE
+echo "" | tee -a $LOG_FILE
+
+echo "Remaining login users:" | tee -a $LOG_FILE
+egrep -v '(/false|/nologin)' /etc/passwd | cut -d: -f1 | tee -a $LOG_FILE
+
+echo "" | tee -a $LOG_FILE
+echo "Log saved to: $LOG_FILE"</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h3>⚠️ Final Reminder</h3>
+            <p>Root-only systems are <strong>NOT recommended</strong> for production environments.</p>
+            <p>Consider the security alternatives provided above.</p>
+            <p style="margin-top: 20px; opacity: 0.8;">
+                Always maintain backups and have a recovery plan before making system changes.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling;
+            const code = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy code. Please copy manually.');
+            });
+        }
+
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Print functionality
+        function printGuide() {
+            window.print();
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+P for print
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                printGuide();
+            }
+        });
+    </script>
+</body>
+</html>

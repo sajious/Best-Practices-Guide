@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Domain Join Guide - Active Directory Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #ecf0f1;
+            --dark-bg: #34495e;
+            --code-bg: #282c34;
+            --border-color: #bdc3c7;
+            --text-color: #2c3e50;
+            --light-text: #7f8c8d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-bg) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .overview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .overview-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .overview-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .overview-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 30px;
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-title::before {
+            content: attr(data-icon);
+            font-size: 1.2em;
+        }
+
+        .subsection {
+            margin: 30px 0;
+            background: var(--light-bg);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .subsection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            margin: -25px -25px 20px -25px;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .subsection-header:hover {
+            background: #f8f9fa;
+        }
+
+        .subsection-header h3 {
+            font-size: 1.4em;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-required {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .badge-recommended {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .badge-optional {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .toggle-icon {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+
+        .subsection.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .subsection.collapsed .subsection-content {
+            display: none;
+        }
+
+        .info-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid;
+        }
+
+        .info-box-note {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            color: #1565c0;
+        }
+
+        .info-box-warning {
+            background: #fff3e0;
+            border-color: #ff9800;
+            color: #e65100;
+        }
+
+        .info-box-danger {
+            background: #ffebee;
+            border-color: #f44336;
+            color: #c62828;
+        }
+
+        .info-box-success {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        .info-box h4 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid #444;
+            position: relative;
+        }
+
+        pre::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            color: #61dafb;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        .command {
+            color: #61dafb;
+        }
+
+        .comment {
+            color: #5c6370;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--light-bg);
+        }
+
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 10px 0;
+            line-height: 1.8;
+        }
+
+        .step-list {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 50px;
+            margin: 25px 0;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--secondary-color);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding-left: 35px;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        footer h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .resources {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .resource-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .resource-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .resource-card a {
+            color: #61dafb;
+            text-decoration: none;
+        }
+
+        .resource-card a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .section {
+                padding-left: 15px;
+            }
+
+            .section-title {
+                font-size: 1.5em;
+            }
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(97, 218, 251, 0.2);
+            border: 1px solid #61dafb;
+            color: #61dafb;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background: rgba(97, 218, 251, 0.4);
+        }
+
+        .copy-button.copied {
+            background: rgba(39, 174, 96, 0.4);
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Linux Domain Join Guide</h1>
+            <p>Complete Guide to Joining Linux Systems to Active Directory</p>
+        </header>
+
+        <div class="overview">
+            <div class="overview-card">
+                <h3>📖 8</h3>
+                <p>Total Sections</p>
+            </div>
+            <div class="overview-card">
+                <h3>⚙️ 35+</h3>
+                <p>Configuration Steps</p>
+            </div>
+            <div class="overview-card">
+                <h3>⏱️ 2-3</h3>
+                <p>Hours (Est.)</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title" data-icon="📖">Overview</h2>
+                
+                <p style="font-size: 1.1em; line-height: 1.8; margin-bottom: 20px;">
+                    This comprehensive guide provides step-by-step instructions for joining Linux systems to a Windows Active Directory domain. 
+                    It covers multiple distributions and authentication methods, following industry best practices for enterprise environments.
+                </p>
+
+                <div class="info-box info-box-note">
+                    <h4>🎯 What You'll Learn</h4>
+                    <ul class="checklist">
+                        <li>System preparation and prerequisites</li>
+                        <li>DNS and network configuration</li>
+                        <li>Kerberos authentication setup</li>
+                        <li>SSSD and Winbind configuration</li>
+                        <li>User authentication and home directories</li>
+                        <li>Sudo access for domain users</li>
+                        <li>Security hardening and best practices</li>
+                        <li>Troubleshooting common issues</li>
+                    </ul>
+                </div>
+
+                <div class="info-box info-box-warning">
+                    <h4>⚠️ Before You Begin</h4>
+                    <p><strong>Ensure you have:</strong></p>
+                    <ul>
+                        <li>Root or sudo access to the Linux system</li>
+                        <li>Domain administrator credentials</li>
+                        <li>Network connectivity to domain controllers</li>
+                        <li>DNS properly configured to resolve domain</li>
+                        <li>Time synchronization with domain controllers</li>
+                        <li>Firewall rules allowing AD communication</li>
+                    </ul>
+                </div>
+
+                <h3 style="margin: 30px 0 20px 0; color: var(--primary-color);">🎯 Integration Approach</h3>
+                <p>This guide covers two primary methods:</p>
+                
+                <table>
+                    <tr>
+                        <th>Method</th>
+                        <th>Best For</th>
+                        <th>Features</th>
+                    </tr>
+                    <tr>
+                        <td><strong>SSSD (Recommended)</strong></td>
+                        <td>Modern Linux distributions (RHEL 7+, Ubuntu 18+)</td>
+                        <td>Better caching, offline authentication, GPO support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Winbind</strong></td>
+                        <td>Legacy systems, Samba integration required</td>
+                        <td>Samba integration, simpler configuration</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="💻">System Requirements</h2>
+                
+                <h3 style="margin: 20px 0;">Supported Distributions</h3>
+                <table>
+                    <tr>
+                        <th>Distribution</th>
+                        <th>Versions</th>
+                        <th>Recommended Method</th>
+                    </tr>
+                    <tr>
+                        <td>Red Hat Enterprise Linux / CentOS / Oracle Linux</td>
+                        <td>7.x, 8.x, 9.x</td>
+                        <td>SSSD with realmd</td>
+                    </tr>
+                    <tr>
+                        <td>Ubuntu / Debian</td>
+                        <td>18.04+, 20.04+, 22.04+</td>
+                        <td>SSSD with realmd</td>
+                    </tr>
+                    <tr>
+                        <td>SUSE Linux Enterprise</td>
+                        <td>12+, 15+</td>
+                        <td>SSSD or YaST</td>
+                    </tr>
+                    <tr>
+                        <td>Fedora</td>
+                        <td>35+</td>
+                        <td>SSSD with realmd</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin: 30px 0 20px 0;">Network Requirements</h3>
+                <table>
+                    <tr>
+                        <th>Protocol</th>
+                        <th>Port</th>
+                        <th>Direction</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td>DNS</td>
+                        <td>53 (TCP/UDP)</td>
+                        <td>Outbound</td>
+                        <td>Domain name resolution</td>
+                    </tr>
+                    <tr>
+                        <td>Kerberos</td>
+                        <td>88 (TCP/UDP)</td>
+                        <td>Outbound</td>
+                        <td>Authentication</td>
+                    </tr>
+                    <tr>
+                        <td>LDAP</td>
+                        <td>389 (TCP/UDP)</td>
+                        <td>Outbound</td>
+                        <td>Directory queries</td>
+                    </tr>
+                    <tr>
+                        <td>LDAPS</td>
+                        <td>636 (TCP)</td>
+                        <td>Outbound</td>
+                        <td>Secure directory queries</td>
+                    </tr>
+                    <tr>
+                        <td>Global Catalog</td>
+                        <td>3268/3269 (TCP)</td>
+                        <td>Outbound</td>
+                        <td>Forest-wide queries</td>
+                    </tr>
+                    <tr>
+                        <td>SMB</td>
+                        <td>445 (TCP)</td>
+                        <td>Outbound</td>
+                        <td>File sharing (if needed)</td>
+                    </tr>
+                    <tr>
+                        <td>NTP</td>
+                        <td>123 (UDP)</td>
+                        <td>Outbound</td>
+                        <td>Time synchronization</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="🔧">Prerequisites and System Preparation</h2>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>1. System Updates <span class="badge badge-required">Required</span></h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>For RHEL/CentOS/Oracle Linux:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Update all packages</span>
+sudo dnf update -y
+
+<span class="comment"># Install essential tools</span>
+sudo dnf install -y wget curl vim net-tools bind-utils
+
+<span class="comment"># Reboot if kernel was updated</span>
+sudo reboot</code></pre>
+
+                        <p><strong>For Ubuntu/Debian:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Update package lists</span>
+sudo apt update
+
+<span class="comment"># Upgrade all packages</span>
+sudo apt upgrade -y
+
+<span class="comment"># Install essential tools</span>
+sudo apt install -y wget curl vim net-tools dnsutils
+
+<span class="comment"># Reboot if kernel was updated</span>
+sudo reboot</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>2. Hostname Configuration <span class="badge badge-required">Required</span></h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <div class="info-box info-box-note">
+                            <h4>📝 Important</h4>
+                            <p>The hostname must be a Fully Qualified Domain Name (FQDN) and should follow your organization's naming convention.</p>
+                        </div>
+
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Set hostname (replace with your values)</span>
+sudo hostnamectl set-hostname linuxpc01.domain.local
+
+<span class="comment"># Verify hostname</span>
+hostnamectl
+hostname -f
+
+<span class="comment"># Update /etc/hosts</span>
+sudo vim /etc/hosts
+
+<span class="comment"># Add this line (replace with your IP and hostname):</span>
+<span class="comment"># 192.168.1.100  linuxpc01.domain.local  linuxpc01</span></code></pre>
+
+                        <p><strong>Verify configuration:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Should return FQDN</span>
+hostname -f
+
+<span class="comment"># Should return short name</span>
+hostname -s</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>3. DNS Configuration <span class="badge badge-required">Required</span></h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <div class="info-box info-box-warning">
+                            <h4>⚠️ Critical Step</h4>
+                            <p>DNS must be configured to use your domain controllers. This is the most common cause of domain join failures.</p>
+                        </div>
+
+                        <p><strong>Configure DNS servers:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Edit resolv.conf (traditional method)</span>
+sudo vim /etc/resolv.conf
+
+<span class="comment"># Add these lines (replace with your domain and DC IPs):</span>
+<span class="comment"># search domain.local</span>
+<span class="comment"># nameserver 192.168.1.10</span>
+<span class="comment"># nameserver 192.168.1.11</span></code></pre>
+
+                        <p><strong>For systems using NetworkManager:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Using nmcli</span>
+sudo nmcli con mod "System eth0" ipv4.dns "192.168.1.10 192.168.1.11"
+sudo nmcli con mod "System eth0" ipv4.dns-search "domain.local"
+sudo nmcli con down "System eth0" && sudo nmcli con up "System eth0"</code></pre>
+
+                        <p><strong>For Ubuntu with Netplan:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Edit netplan configuration</span>
+sudo vim /etc/netplan/01-netcfg.yaml</code></pre>
+
+                        <pre data-lang="yaml"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses: [192.168.1.100/24]
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses: [192.168.1.10, 192.168.1.11]
+        search: [domain.local]</code></pre>
+
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Apply netplan configuration</span>
+sudo netplan apply</code></pre>
+
+                        <p><strong>Verify DNS resolution:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Test domain resolution</span>
+nslookup domain.local
+
+<span class="comment"># Test DC resolution</span>
+nslookup dc01.domain.local
+
+<span class="comment"># Test SRV records (critical for AD)</span>
+nslookup -type=SRV _ldap._tcp.domain.local
+nslookup -type=SRV _kerberos._tcp.domain.local
+
+<span class="comment"># Using dig (more detailed)</span>
+dig domain.local
+dig _ldap._tcp.domain.local SRV</code></pre>
+
+                        <div class="info-box info-box-success">
+                            <h4>✅ Expected Results</h4>
+                            <p>You should see your domain controllers listed in the SRV record queries. If not, check your DNS server configuration.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>4. Time Synchronization <span class="badge badge-required">Required</span></h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <div class="info-box info-box-warning">
+                            <h4>⚠️ Kerberos Requirement</h4>
+                            <p>Kerberos authentication requires time synchronization within 5 minutes of the domain controllers. Configure NTP to sync with your DCs.</p>
+                        </div>
+
+                        <p><strong>Using chronyd (RHEL/CentOS 7+):</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Install chrony</span>
+sudo dnf install -y chrony
+
+<span class="comment"># Edit chrony configuration</span>
+sudo vim /etc/chrony.conf
+
+<span class="comment"># Comment out default servers and add your DCs:</span>
+<span class="comment"># server dc01.domain.local iburst</span>
+<span class="comment"># server dc02.domain.local iburst</span>
+
+<span class="comment"># Restart and enable chrony</span>
+sudo systemctl restart chronyd
+sudo systemctl enable chronyd
+
+<span class="comment"># Verify time sync</span>
+chronyc sources -v
+chronyc tracking</code></pre>
+
+                        <p><strong>Using systemd-timesyncd (Ubuntu):</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Edit timesyncd configuration</span>
+sudo vim /etc/systemd/timesyncd.conf
+
+<span class="comment"># Add under [Time] section:</span>
+<span class="comment"># NTP=dc01.domain.local dc02.domain.local</span>
+<span class="comment"># FallbackNTP=pool.ntp.org</span>
+
+<span class="comment"># Restart service</span>
+sudo systemctl restart systemd-timesyncd
+sudo systemctl enable systemd-timesyncd
+
+<span class="comment"># Verify status</span>
+timedatectl status</code></pre>
+
+                        <p><strong>Force immediate sync:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># For chronyd</span>
+sudo chronyc makestep
+
+<span class="comment"># For systemd-timesyncd</span>
+sudo systemctl restart systemd-timesyncd
+
+<span class="comment"># Check current time</span>
+date
+timedatectl</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>5. Firewall Configuration <span class="badge badge-required">Required</span></h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>For firewalld (RHEL/CentOS):</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Check firewall status</span>
+sudo firewall-cmd --state
+
+<span class="comment"># Allow Kerberos</span>
+sudo firewall-cmd --permanent --add-service=kerberos
+
+<span class="comment"># Allow LDAP</span>
+sudo firewall-cmd --permanent --add-service=ldap
+sudo firewall-cmd --permanent --add-service=ldaps
+
+<span class="comment"># Allow DNS</span>
+sudo firewall-cmd --permanent --add-service=dns
+
+<span class="comment"># Allow Samba (if using Winbind)</span>
+sudo firewall-cmd --permanent --add-service=samba
+
+<span class="comment"># Reload firewall</span>
+sudo firewall-cmd --reload
+
+<span class="comment"># Verify rules</span>
+sudo firewall-cmd --list-all</code></pre>
+
+                        <p><strong>For UFW (Ubuntu):</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Check UFW status</span>
+sudo ufw status
+
+<span class="comment"># Allow required ports</span>
+sudo ufw allow 88/tcp    # Kerberos
+sudo ufw allow 88/udp    # Kerberos
+sudo ufw allow 389/tcp   # LDAP
+sudo ufw allow 636/tcp   # LDAPS
+sudo ufw allow 53/tcp    # DNS
+sudo ufw allow 53/udp    # DNS
+
+<span class="comment"># Reload UFW</span>
+sudo ufw reload
+
+<span class="comment"># Verify rules</span>
+sudo ufw status verbose</code></pre>
+
+                        <div class="info-box info-box-note">
+                            <h4>💡 Development/Testing</h4>
+                            <p>For testing environments, you may temporarily disable the firewall. Never do this in production!</p>
+                            <pre data-lang="bash"><code><span class="comment"># Disable firewalld temporarily</span>
+sudo systemctl stop firewalld
+
+<span class="comment"># Disable UFW temporarily</span>
+sudo ufw disable</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="🔐">Method 1: Join Domain Using SSSD (Recommended)</h2>
+                
+                <div class="info-box info-box-success">
+                    <h4>✅ Why SSSD?</h4>
+                    <ul>
+                        <li>Better performance with offline caching</li>
+                        <li>Native support for modern authentication</li>
+                        <li>GPO support (with additional packages)</li>
+                        <li>Better integration with systemd</li>
+                        <li>Recommended by Red Hat and Ubuntu</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 1: Install Required Packages</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>For RHEL/CentOS/Oracle Linux:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Install SSSD and related packages</span>
+sudo dnf install -y \
+    realmd \
+    sssd \
+    sssd-tools \
+    sssd-ad \
+    adcli \
+    krb5-workstation \
+    oddjob \
+    oddjob-mkhomedir \
+    samba-common-tools
+
+<span class="comment"># Verify installation</span>
+rpm -qa | grep -E "realmd|sssd|adcli"</code></pre>
+
+                        <p><strong>For Ubuntu/Debian:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Install SSSD and related packages</span>
+sudo apt install -y \
+    realmd \
+    sssd \
+    sssd-tools \
+    sssd-ad \
+    adcli \
+    krb5-user \
+    packagekit \
+    libnss-sss \
+    libpam-sss \
+    samba-common-bin
+
+<span class="comment"># Verify installation</span>
+dpkg -l | grep -E "realmd|sssd|adcli"</code></pre>
+
+                        <div class="info-box info-box-note">
+                            <h4>📝 Kerberos Configuration Prompt</h4>
+                            <p>During installation, you may be prompted for Kerberos realm information:</p>
+                            <ul>
+                                <li><strong>Default Kerberos realm:</strong> DOMAIN.LOCAL (uppercase)</li>
+                                <li><strong>Kerberos servers:</strong> dc01.domain.local</li>
+                                <li><strong>Administrative server:</strong> dc01.domain.local</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 2: Discover Domain</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Discover the domain</span>
+sudo realm discover domain.local
+
+<span class="comment"># Expected output should show:</span>
+<span class="comment"># domain.local</span>
+<span class="comment">#   type: kerberos</span>
+<span class="comment">#   realm-name: DOMAIN.LOCAL</span>
+<span class="comment">#   domain-name: domain.local</span>
+<span class="comment">#   configured: no</span>
+<span class="comment">#   server-software: active-directory</span>
+<span class="comment">#   client-software: sssd</span>
+<span class="comment">#   required-package: sssd-tools</span>
+<span class="comment">#   required-package: sssd</span>
+<span class="comment">#   required-package: adcli</span>
+<span class="comment">#   required-package: samba-common-tools</span></code></pre>
+
+                        <div class="info-box info-box-danger">
+                            <h4>❌ Troubleshooting Discovery Failures</h4>
+                            <p>If discovery fails, check:</p>
+                            <ul>
+                                <li>DNS configuration is correct</li>
+                                <li>SRV records are resolvable</li>
+                                <li>Network connectivity to domain controllers</li>
+                                <li>Firewall rules allow required ports</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 3: Join Domain</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>Basic domain join:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Join domain with administrator credentials</span>
+sudo realm join --user=administrator domain.local
+
+<span class="comment"># You will be prompted for the administrator password</span>
+<span class="comment"># Password for administrator:</span></code></pre>
+
+                        <p><strong>Advanced domain join with options:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Join with specific OU and computer name</span>
+sudo realm join --user=administrator \
+    --computer-ou="OU=Linux,OU=Computers,DC=domain,DC=local" \
+    --os-name="Oracle Linux" \
+    --os-version="8.9" \
+    domain.local
+
+<span class="comment"># Join with verbose output for troubleshooting</span>
+sudo realm join --user=administrator --verbose domain.local
+
+<span class="comment"># Join using specific domain controller</span>
+sudo realm join --user=administrator \
+    --server=dc01.domain.local \
+    domain.local</code></pre>
+
+                        <p><strong>Verify domain join:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Check realm status</span>
+sudo realm list
+
+<span class="comment"># Verify Kerberos ticket</span>
+sudo kinit administrator@DOMAIN.LOCAL
+sudo klist
+
+<span class="comment"># Test domain connectivity</span>
+sudo adcli testjoin
+
+<span class="comment"># Check SSSD status</span>
+sudo systemctl status sssd</code></pre>
+
+                        <div class="info-box info-box-success">
+                            <h4>✅ Successful Join Indicators</h4>
+                            <ul>
+                                <li>Computer account appears in Active Directory</li>
+                                <li><code>realm list</code> shows "configured: kerberos-member"</li>
+                                <li>SSSD service is running</li>
+                                <li>Kerberos tickets can be obtained</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 4: Configure SSSD</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>Edit SSSD configuration:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Backup original configuration</span>
+sudo cp /etc/sssd/sssd.conf /etc/sssd/sssd.conf.backup
+
+<span class="comment"># Edit SSSD configuration</span>
+sudo vim /etc/sssd/sssd.conf</code></pre>
+
+                        <p><strong>Recommended SSSD configuration:</strong></p>
+                        <pre data-lang="ini"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>[sssd]
+domains = domain.local
+config_file_version = 2
+services = nss, pam
+
+[domain/domain.local]
+# Active Directory provider
+id_provider = ad
+auth_provider = ad
+access_provider = ad
+chpass_provider = ad
+
+# Domain settings
+ad_domain = domain.local
+krb5_realm = DOMAIN.LOCAL
+realmd_tags = manages-system joined-with-adcli
+
+# Cache settings
+cache_credentials = True
+krb5_store_password_if_offline = True
+
+# User and group settings
+default_shell = /bin/bash
+fallback_homedir = /home/%u@%d
+use_fully_qualified_names = False
+
+# Performance tuning
+ldap_id_mapping = True
+ldap_schema = ad
+enumerate = False
+
+# Access control (optional - allow all by default)
+# ad_access_filter = (memberOf=CN=Linux-Users,OU=Groups,DC=domain,DC=local)
+
+[nss]
+filter_groups = root
+filter_users = root
+
+[pam]
+offline_credentials_expiration = 7</code></pre>
+
+                        <p><strong>Set proper permissions and restart:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Set secure permissions</span>
+sudo chmod 600 /etc/sssd/sssd.conf
+
+<span class="comment"># Restart SSSD</span>
+sudo systemctl restart sssd
+sudo systemctl enable sssd
+
+<span class="comment"># Verify SSSD is running</span>
+sudo systemctl status sssd
+
+<span class="comment"># Check SSSD logs for errors</span>
+sudo tail -f /var/log/sssd/sssd_domain.local.log</code></pre>
+
+                        <div class="info-box info-box-note">
+                            <h4>📝 Configuration Options Explained</h4>
+                            <ul>
+                                <li><strong>use_fully_qualified_names = False:</strong> Allows login as "username" instead of "username@domain.local"</li>
+                                <li><strong>cache_credentials = True:</strong> Enables offline authentication</li>
+                                <li><strong>ldap_id_mapping = True:</strong> Automatically maps AD SIDs to Unix UIDs/GIDs</li>
+                                <li><strong>enumerate = False:</strong> Improves performance by not enumerating all users</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 5: Configure Home Directory Creation</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>Enable automatic home directory creation:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># For RHEL/CentOS using authselect</span>
+sudo authselect select sssd with-mkhomedir --force
+
+<span class="comment"># For older systems or manual configuration</span>
+sudo echo "session required pam_mkhomedir.so skel=/etc/skel/ umask=0077" >> /etc/pam.d/common-session
+
+<span class="comment"># Enable and start oddjobd (for RHEL/CentOS)</span>
+sudo systemctl enable oddjobd
+sudo systemctl start oddjobd
+
+<span class="comment"># Verify oddjobd is running</span>
+sudo systemctl status oddjobd</code></pre>
+
+                        <p><strong>For Ubuntu systems:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Enable mkhomedir in PAM</span>
+sudo pam-auth-update --enable mkhomedir
+
+<span class="comment"># Or manually add to PAM configuration</span>
+sudo echo "session required pam_mkhomedir.so skel=/etc/skel/ umask=0077" | \
+    sudo tee -a /etc/pam.d/common-session</code></pre>
+
+                        <p><strong>Test home directory creation:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Check if user can be resolved</span>
+id testuser@domain.local
+
+<span class="comment"># Test login (creates home directory)</span>
+sudo su - testuser@domain.local
+
+<span class="comment"># Verify home directory was created</span>
+ls -la /home/testuser@domain.local</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 6: Test Authentication</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>Test user resolution:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Look up domain user</span>
+id administrator
+getent passwd administrator
+
+<span class="comment"># Look up domain group</span>
+getent group "domain admins"
+
+<span class="comment"># List all domain users (if enumerate is enabled)</span>
+getent passwd | grep domain.local
+
+<span class="comment"># Test specific user</span>
+id john.doe</code></pre>
+
+                        <p><strong>Test authentication:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Switch to domain user</span>
+sudo su - john.doe
+
+<span class="comment"># Check current user</span>
+whoami
+id
+
+<span class="comment"># Check home directory</span>
+pwd
+ls -la
+
+<span class="comment"># Exit back to root</span>
+exit</code></pre>
+
+                        <p><strong>Test Kerberos authentication:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Obtain Kerberos ticket</span>
+kinit john.doe@DOMAIN.LOCAL
+
+<span class="comment"># List Kerberos tickets</span>
+klist
+
+<span class="comment"># Destroy tickets</span>
+kdestroy</code></pre>
+
+                        <div class="info-box info-box-success">
+                            <h4>✅ Successful Authentication Indicators</h4>
+                            <ul>
+                                <li><code>id username</code> returns UID, GID, and group memberships</li>
+                                <li><code>getent passwd username</code> returns user information</li>
+                                <li>Can switch to domain user with <code>su -</code></li>
+                                <li>Home directory is created automatically</li>
+                                <li>Kerberos tickets can be obtained</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="🔧">Method 2: Join Domain Using Winbind (Alternative)</h2>
+                
+                <div class="info-box info-box-note">
+                    <h4>📝 When to Use Winbind</h4>
+                    <ul>
+                        <li>Legacy systems that don't support SSSD well</li>
+                        <li>When Samba file sharing integration is required</li>
+                        <li>Environments already using Samba infrastructure</li>
+                        <li>Simpler configuration for basic needs</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 1: Install Samba and Winbind</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>For RHEL/CentOS/Oracle Linux:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Install required packages</span>
+sudo dnf install -y \
+    samba \
+    samba-winbind \
+    samba-winbind-clients \
+    samba-common-tools \
+    krb5-workstation \
+    oddjob-mkhomedir
+
+<span class="comment"># Verify installation</span>
+rpm -qa | grep -E "samba|winbind"</code></pre>
+
+                        <p><strong>For Ubuntu/Debian:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Install required packages</span>
+sudo apt install -y \
+    samba \
+    winbind \
+    libnss-winbind \
+    libpam-winbind \
+    krb5-user \
+    samba-common-bin
+
+<span class="comment"># Verify installation</span>
+dpkg -l | grep -E "samba|winbind"</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 2: Configure Samba</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Backup original configuration</span>
+sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.backup
+
+<span class="comment"># Edit Samba configuration</span>
+sudo vim /etc/samba/smb.conf</code></pre>
+
+                        <p><strong>Samba configuration for Winbind:</strong></p>
+                        <pre data-lang="ini"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>[global]
+   # Domain settings
+   workgroup = DOMAIN
+   realm = DOMAIN.LOCAL
+   security = ADS
+   
+   # Winbind settings
+   winbind use default domain = yes
+   winbind offline logon = yes
+   winbind refresh tickets = yes
+   winbind enum users = no
+   winbind enum groups = no
+   
+   # ID mapping
+   idmap config * : backend = tdb
+   idmap config * : range = 10000-20000
+   idmap config DOMAIN : backend = rid
+   idmap config DOMAIN : range = 100000-999999
+   
+   # Template settings
+   template shell = /bin/bash
+   template homedir = /home/%U
+   
+   # Kerberos settings
+   kerberos method = secrets and keytab
+   
+   # Logging
+   log file = /var/log/samba/%m.log
+   max log size = 50
+   
+   # Performance
+   load printers = no
+   printing = bsd
+   printcap name = /dev/null
+   disable spoolss = yes</code></pre>
+
+                        <p><strong>Verify configuration syntax:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Test Samba configuration</span>
+sudo testparm
+
+<span class="comment"># Should show no errors</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 3: Join Domain with Winbind</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Join the domain</span>
+sudo net ads join -U administrator
+
+<span class="comment"># You will be prompted for password:</span>
+<span class="comment"># Enter administrator's password:</span>
+
+<span class="comment"># Verify domain join</span>
+sudo net ads testjoin
+
+<span class="comment"># Should return: "Join is OK"</span>
+
+<span class="comment"># Check domain info</span>
+sudo net ads info</code></pre>
+
+                        <p><strong>Start and enable services:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Start Winbind</span>
+sudo systemctl start winbind
+sudo systemctl enable winbind
+
+<span class="comment"># Verify Winbind is running</span>
+sudo systemctl status winbind
+
+<span class="comment"># Test Winbind connectivity</span>
+sudo wbinfo --ping-dc
+sudo wbinfo -t</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 4: Configure NSS and PAM</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>Configure NSS (Name Service Switch):</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Backup NSS configuration</span>
+sudo cp /etc/nsswitch.conf /etc/nsswitch.conf.backup
+
+<span class="comment"># Edit NSS configuration</span>
+sudo vim /etc/nsswitch.conf
+
+<span class="comment"># Modify these lines to include winbind:</span>
+<span class="comment"># passwd:     files winbind</span>
+<span class="comment"># shadow:     files winbind</span>
+<span class="comment"># group:      files winbind</span></code></pre>
+
+                        <p><strong>Configure PAM for authentication:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># For RHEL/CentOS using authselect</span>
+sudo authselect select winbind with-mkhomedir --force
+
+<span class="comment"># Enable oddjobd for home directory creation</span>
+sudo systemctl enable oddjobd
+sudo systemctl start oddjobd</code></pre>
+
+                        <p><strong>For Ubuntu, manually configure PAM:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Edit common-auth</span>
+sudo vim /etc/pam.d/common-auth
+
+<span class="comment"># Add this line:</span>
+<span class="comment"># auth sufficient pam_winbind.so</span>
+
+<span class="comment"># Edit common-account</span>
+sudo vim /etc/pam.d/common-account
+
+<span class="comment"># Add this line:</span>
+<span class="comment"># account sufficient pam_winbind.so</span>
+
+<span class="comment"># Edit common-session</span>
+sudo vim /etc/pam.d/common-session
+
+<span class="comment"># Add these lines:</span>
+<span class="comment"># session required pam_mkhomedir.so skel=/etc/skel/ umask=0077</span>
+<span class="comment"># session sufficient pam_winbind.so</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Step 5: Test Winbind Authentication</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Test Winbind functionality</span>
+sudo wbinfo -u  # List domain users
+sudo wbinfo -g  # List domain groups
+
+<span class="comment"># Test user lookup</span>
+sudo wbinfo -i administrator
+id administrator
+
+<span class="comment"># Test group lookup</span>
+getent group "domain admins"
+
+<span class="comment"># Test authentication</span>
+sudo wbinfo -a administrator%password
+
+<span class="comment"># Switch to domain user</span>
+sudo su - john.doe</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="🔑">Configure Sudo Access for Domain Users</h2>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Method 1: Using sudoers.d (Recommended)</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Create sudoers file for domain admins</span>
+sudo visudo -f /etc/sudoers.d/domain-admins
+
+<span class="comment"># Add these lines:</span>
+<span class="comment"># Allow specific user</span>
+<span class="comment"># john.doe ALL=(ALL) ALL</span>
+
+<span class="comment"># Allow domain admins group</span>
+<span class="comment"># %domain\ admins ALL=(ALL) ALL</span>
+
+<span class="comment"># Allow specific AD group</span>
+<span class="comment"># %linux-admins@domain.local ALL=(ALL) ALL</span>
+
+<span class="comment"># Set proper permissions</span>
+sudo chmod 440 /etc/sudoers.d/domain-admins</code></pre>
+
+                        <div class="info-box info-box-warning">
+                            <h4>⚠️ Group Name Formatting</h4>
+                            <p>When using groups with spaces, escape the space with a backslash:</p>
+                            <ul>
+                                <li><code>%domain\ admins</code> for "Domain Admins"</li>
+                                <li>Or use quotes: <code>%"domain admins"</code></li>
+                            </ul>
+                        </div>
+
+                        <p><strong>Test sudo access:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Switch to domain user</span>
+sudo su - john.doe
+
+<span class="comment"># Test sudo</span>
+sudo whoami  # Should return: root
+
+<span class="comment"># List sudo privileges</span>
+sudo -l</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Method 2: Using SSSD Access Control</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p>Configure SSSD to restrict access to specific groups:</p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Edit SSSD configuration</span>
+sudo vim /etc/sssd/sssd.conf
+
+<span class="comment"># Add to [domain/domain.local] section:</span>
+<span class="comment"># access_provider = ad</span>
+<span class="comment"># ad_access_filter = (memberOf=CN=Linux-Users,OU=Groups,DC=domain,DC=local)</span>
+
+<span class="comment"># Restart SSSD</span>
+sudo systemctl restart sssd</code></pre>
+
+                        <p><strong>Allow multiple groups:</strong></p>
+                        <pre data-lang="ini"><button class="copy-button" onclick="copyCode(this)">Copy</button><code># Multiple groups with OR condition
+ad_access_filter = (|(memberOf=CN=Linux-Users,OU=Groups,DC=domain,DC=local)(memberOf=CN=Linux-Admins,OU=Groups,DC=domain,DC=local))</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="🛡️">Security Hardening</h2>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>1. SSH Configuration</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Backup SSH configuration</span>
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+
+<span class="comment"># Edit SSH configuration</span>
+sudo vim /etc/ssh/sshd_config
+
+<span class="comment"># Recommended settings:</span>
+<span class="comment"># PermitRootLogin no</span>
+<span class="comment"># PasswordAuthentication yes</span>
+<span class="comment"># PubkeyAuthentication yes</span>
+<span class="comment"># UsePAM yes</span>
+<span class="comment"># GSSAPIAuthentication yes</span>
+<span class="comment"># GSSAPICleanupCredentials yes</span>
+
+<span class="comment"># Allow specific domain groups</span>
+<span class="comment"># AllowGroups wheel domain\ admins linux-admins@domain.local</span>
+
+<span class="comment"># Test configuration</span>
+sudo sshd -t
+
+<span class="comment"># Restart SSH</span>
+sudo systemctl restart sshd</code></pre>
+
+                        <div class="info-box info-box-success">
+                            <h4>✅ SSH Best Practices</h4>
+                            <ul>
+                                <li>Disable root login</li>
+                                <li>Use key-based authentication when possible</li>
+                                <li>Enable GSSAPI for Kerberos authentication</li>
+                                <li>Restrict access to specific groups</li>
+                                <li>Use fail2ban for brute force protection</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>2. SELinux Configuration</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Check SELinux status</span>
+sudo getenforce
+
+<span class="comment"># Set SELinux booleans for domain authentication</span>
+sudo setsebool -P allow_kerberos 1
+sudo setsebool -P authlogin_nsswitch_use_ldap 1
+
+<span class="comment"># For Samba/Winbind</span>
+sudo setsebool -P samba_domain_controller 1
+
+<span class="comment"># Verify booleans</span>
+sudo getsebool -a | grep -E "kerberos|ldap|samba"
+
+<span class="comment"># Check for SELinux denials</span>
+sudo ausearch -m avc -ts recent</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>3. Password Policy</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Configure password aging</span>
+sudo vim /etc/login.defs
+
+<span class="comment"># Set these values:</span>
+<span class="comment"># PASS_MAX_DAYS   90</span>
+<span class="comment"># PASS_MIN_DAYS   1</span>
+<span class="comment"># PASS_MIN_LEN    12</span>
+<span class="comment"># PASS_WARN_AGE   7</span>
+
+<span class="comment"># Configure PAM password quality</span>
+sudo vim /etc/security/pwquality.conf
+
+<span class="comment"># Recommended settings:</span>
+<span class="comment"># minlen = 12</span>
+<span class="comment"># dcredit = -1</span>
+<span class="comment"># ucredit = -1</span>
+<span class="comment"># ocredit = -1</span>
+<span class="comment"># lcredit = -1</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>4. Audit Logging</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Enable audit daemon</span>
+sudo systemctl enable auditd
+sudo systemctl start auditd
+
+<span class="comment"># Add audit rules for domain authentication</span>
+sudo vim /etc/audit/rules.d/domain-auth.rules
+
+<span class="comment"># Add these rules:</span>
+<span class="comment"># -w /etc/sssd/sssd.conf -p wa -k sssd-config</span>
+<span class="comment"># -w /etc/krb5.conf -p wa -k kerberos-config</span>
+<span class="comment"># -w /etc/samba/smb.conf -p wa -k samba-config</span>
+
+<span class="comment"># Reload audit rules</span>
+sudo augenrules --load
+
+<span class="comment"># Search audit logs</span>
+sudo ausearch -k sssd-config</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="🔍">Troubleshooting</h2>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Issue 1: Cannot Discover Domain</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <div class="info-box info-box-danger">
+                            <h4>❌ Symptoms</h4>
+                            <ul>
+                                <li><code>realm discover</code> fails or returns no results</li>
+                                <li>DNS queries for SRV records fail</li>
+                                <li>Cannot reach domain controllers</li>
+                            </ul>
+                        </div>
+
+                        <p><strong>Troubleshooting steps:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># 1. Verify DNS configuration</span>
+cat /etc/resolv.conf
+nslookup domain.local
+nslookup dc01.domain.local
+
+<span class="comment"># 2. Test SRV records</span>
+nslookup -type=SRV _ldap._tcp.domain.local
+nslookup -type=SRV _kerberos._tcp.domain.local
+dig _ldap._tcp.domain.local SRV
+
+<span class="comment"># 3. Test network connectivity</span>
+ping dc01.domain.local
+telnet dc01.domain.local 389
+telnet dc01.domain.local 88
+
+<span class="comment"># 4. Check firewall</span>
+sudo firewall-cmd --list-all
+sudo iptables -L -n
+
+<span class="comment"># 5. Verify time sync</span>
+date
+chronyc tracking</code></pre>
+
+                        <div class="info-box info-box-success">
+                            <h4>✅ Solutions</h4>
+                            <ul>
+                                <li>Configure DNS to point to domain controllers</li>
+                                <li>Ensure SRV records are resolvable</li>
+                                <li>Check firewall rules allow required ports</li>
+                                <li>Verify network connectivity to DCs</li>
+                                <li>Synchronize time with domain controllers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Issue 2: Domain Join Fails</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <div class="info-box info-box-danger">
+                            <h4>❌ Symptoms</h4>
+                            <ul>
+                                <li><code>realm join</code> fails with error</li>
+                                <li>Authentication errors</li>
+                                <li>Kerberos ticket errors</li>
+                            </ul>
+                        </div>
+
+                        <p><strong>Troubleshooting steps:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># 1. Join with verbose output</span>
+sudo realm join --user=administrator --verbose domain.local
+
+<span class="comment"># 2. Check Kerberos configuration</span>
+cat /etc/krb5.conf
+
+<span class="comment"># 3. Test Kerberos authentication manually</span>
+kinit administrator@DOMAIN.LOCAL
+klist
+
+<span class="comment"># 4. Check for existing computer account</span>
+<span class="comment"># In AD, verify computer account doesn't already exist</span>
+<span class="comment"># If it does, delete it and try again</span>
+
+<span class="comment"># 5. Verify administrator permissions</span>
+<span class="comment"># Ensure account has rights to join computers to domain</span>
+
+<span class="comment"># 6. Check system logs</span>
+sudo journalctl -xe
+sudo tail -f /var/log/messages</code></pre>
+
+                        <p><strong>Common error messages and solutions:</strong></p>
+                        <table>
+                            <tr>
+                                <th>Error</th>
+                                <th>Cause</th>
+                                <th>Solution</th>
+                            </tr>
+                            <tr>
+                                <td>Insufficient permissions</td>
+                                <td>User lacks domain join rights</td>
+                                <td>Use account with domain admin or delegated rights</td>
+                            </tr>
+                            <tr>
+                                <td>Clock skew too great</td>
+                                <td>Time difference > 5 minutes</td>
+                                <td>Synchronize time with domain controllers</td>
+                            </tr>
+                            <tr>
+                                <td>Cannot resolve KDC</td>
+                                <td>DNS/Kerberos misconfiguration</td>
+                                <td>Fix DNS and verify SRV records</td>
+                            </tr>
+                            <tr>
+                                <td>Computer account already exists</td>
+                                <td>Previous join attempt</td>
+                                <td>Delete computer account in AD and retry</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Issue 3: User Cannot Login</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <div class="info-box info-box-danger">
+                            <h4>❌ Symptoms</h4>
+                            <ul>
+                                <li>Domain users cannot login via SSH or console</li>
+                                <li>"Permission denied" or "User not known"</li>
+                                <li>Home directory not created</li>
+                            </ul>
+                        </div>
+
+                        <p><strong>Troubleshooting steps:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># 1. Verify user can be resolved</span>
+id username
+getent passwd username
+
+<span class="comment"># 2. Check SSSD status</span>
+sudo systemctl status sssd
+sudo sssctl domain-status domain.local
+
+<span class="comment"># 3. Check SSSD logs</span>
+sudo tail -f /var/log/sssd/sssd_domain.local.log
+
+<span class="comment"># 4. Clear SSSD cache and restart</span>
+sudo sss_cache -E
+sudo systemctl restart sssd
+
+<span class="comment"># 5. Test authentication</span>
+sudo su - username
+
+<span class="comment"># 6. Check PAM configuration</span>
+sudo pam-auth-update --enable mkhomedir
+
+<span class="comment"># 7. Verify oddjobd is running (RHEL/CentOS)</span>
+sudo systemctl status oddjobd
+
+<span class="comment"># 8. Check SSH configuration</span>
+sudo grep -E "AllowGroups|AllowUsers" /etc/ssh/sshd_config
+
+<span class="comment"># 9. Check authentication logs</span>
+sudo tail -f /var/log/secure  # RHEL/CentOS
+sudo tail -f /var/log/auth.log  # Ubuntu</code></pre>
+
+                        <div class="info-box info-box-success">
+                            <h4>✅ Common Solutions</h4>
+                            <ul>
+                                <li>Restart SSSD service</li>
+                                <li>Clear SSSD cache</li>
+                                <li>Verify user exists in AD</li>
+                                <li>Check access control filters in sssd.conf</li>
+                                <li>Ensure oddjobd/pam_mkhomedir is configured</li>
+                                <li>Verify SSH AllowGroups includes domain users</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Issue 4: Slow Login Performance</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <div class="info-box info-box-warning">
+                            <h4>⚠️ Symptoms</h4>
+                            <ul>
+                                <li>Login takes 30+ seconds</li>
+                                <li>Slow group membership resolution</li>
+                                <li>Timeouts during authentication</li>
+                            </ul>
+                        </div>
+
+                        <p><strong>Performance optimization:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Edit SSSD configuration</span>
+sudo vim /etc/sssd/sssd.conf
+
+<span class="comment"># Add/modify these settings:</span>
+<span class="comment"># [domain/domain.local]</span>
+<span class="comment"># enumerate = False</span>
+<span class="comment"># ldap_id_mapping = True</span>
+<span class="comment"># cache_credentials = True</span>
+<span class="comment"># entry_cache_timeout = 1200</span>
+<span class="comment"># ldap_network_timeout = 3</span>
+<span class="comment"># dns_resolver_timeout = 3</span>
+
+<span class="comment"># Restart SSSD</span>
+sudo systemctl restart sssd
+
+<span class="comment"># Monitor SSSD performance</span>
+sudo sssctl domain-status domain.local
+time id username</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Useful Diagnostic Commands</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Domain and realm information</span>
+sudo realm list
+sudo adcli info domain.local
+
+<span class="comment"># SSSD diagnostics</span>
+sudo sssctl domain-status domain.local
+sudo sss_cache -E  # Clear cache
+sudo sssctl user-checks username
+
+<span class="comment"># Kerberos diagnostics</span>
+klist
+kinit username@DOMAIN.LOCAL
+kdestroy
+
+<span class="comment"># Winbind diagnostics</span>
+sudo wbinfo --ping-dc
+sudo wbinfo -t
+sudo wbinfo -u
+sudo wbinfo -g
+sudo wbinfo -i username
+
+<span class="comment"># User and group resolution</span>
+id username
+getent passwd username
+getent group groupname
+
+<span class="comment"># Network diagnostics</span>
+nslookup domain.local
+dig _ldap._tcp.domain.local SRV
+telnet dc01.domain.local 389
+
+<span class="comment"># Log monitoring</span>
+sudo tail -f /var/log/sssd/sssd_domain.local.log
+sudo tail -f /var/log/secure
+sudo journalctl -u sssd -f</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title" data-icon="📊">Monitoring and Maintenance</h2>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Regular Maintenance Tasks</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <h4>Weekly Tasks:</h4>
+                        <ul class="checklist">
+                            <li>Verify domain connectivity: <code>sudo realm list</code></li>
+                            <li>Check SSSD service status: <code>sudo systemctl status sssd</code></li>
+                            <li>Test user authentication</li>
+                            <li>Review authentication logs</li>
+                        </ul>
+
+                        <h4>Monthly Tasks:</h4>
+                        <ul class="checklist">
+                            <li>Update system packages</li>
+                            <li>Review and rotate logs</li>
+                            <li>Verify time synchronization</li>
+                            <li>Check for security updates</li>
+                            <li>Review sudo access permissions</li>
+                        </ul>
+
+                        <h4>Quarterly Tasks:</h4>
+                        <ul class="checklist">
+                            <li>Review domain join configuration</li>
+                            <li>Update documentation</li>
+                            <li>Test disaster recovery procedures</li>
+                            <li>Audit user access and permissions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-header" onclick="toggleSection(this)">
+                        <h3>Monitoring Scripts</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="subsection-content">
+                        <p><strong>Create monitoring script:</strong></p>
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>sudo vim /usr/local/bin/check-domain-health.sh</code></pre>
+
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code>#!/bin/bash
+# Domain Health Check Script
+
+echo "=== Domain Health Check - $(date) ==="
+echo
+
+# Check realm status
+echo "1. Realm Status:"
+realm list | grep -E "domain-name|configured"
+echo
+
+# Check SSSD status
+echo "2. SSSD Service:"
+systemctl is-active sssd
+echo
+
+# Check domain connectivity
+echo "3. Domain Connectivity:"
+ping -c 2 domain.local > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "✓ Domain reachable"
+else
+    echo "✗ Domain unreachable"
+fi
+echo
+
+# Check time sync
+echo "4. Time Synchronization:"
+chronyc tracking | grep "System time"
+echo
+
+# Test user resolution
+echo "5. User Resolution Test:"
+id administrator > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "✓ User resolution working"
+else
+    echo "✗ User resolution failed"
+fi
+echo
+
+# Check Kerberos
+echo "6. Kerberos Status:"
+klist -k /etc/krb5.keytab | grep -c principal
+echo
+
+echo "=== Health Check Complete ==="</code></pre>
+
+                        <pre data-lang="bash"><button class="copy-button" onclick="copyCode(this)">Copy</button><code><span class="comment"># Make executable</span>
+sudo chmod +x /usr/local/bin/check-domain-health.sh
+
+<span class="comment"># Run health check</span>
+sudo /usr/local/bin/check-domain-health.sh
+
+<span class="comment"># Schedule daily health check</span>
+sudo crontab -e
+<span class="comment"># Add: 0 8 * * * /usr/local/bin/check-domain-health.sh | mail -s "Domain Health Report" admin@domain.local</span></code></pre>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            <h2>🎉 Configuration Complete!</h2>
+            <p style="font-size: 1.2em; margin: 20px 0;">
+                Congratulations! Your Linux system is now successfully joined to the Active Directory domain.
+            </p>
+
+            <div class="info-box info-box-success" style="text-align: left; max-width: 800px; margin: 30px auto;">
+                <h4>✅ Next Steps</h4>
+                <ul class="checklist">
+                    <li>Test domain user login via SSH and console</li>
+                    <li>Configure sudo access for administrative users</li>
+                    <li>Set up automated monitoring and health checks</li>
+                    <li>Document your configuration for future reference</li>
+                    <li>Configure backup procedures for critical files</li>
+                    <li>Test offline authentication (if enabled)</li>
+                    <li>Implement security hardening recommendations</li>
+                    <li>Train users on domain authentication procedures</li>
+                </ul>
+            </div>
+
+            <div class="resources">
+                <div class="resource-card">
+                    <h3>📚 Red Hat Documentation</h3>
+                    <p><a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_authentication_and_authorization_in_rhel/index" target="_blank">RHEL Authentication Guide</a></p>
+                </div>
+                <div class="resource-card">
+                    <h3>🐧 Ubuntu Documentation</h3>
+                    <p><a href="https://ubuntu.com/server/docs/service-sssd" target="_blank">Ubuntu SSSD Guide</a></p>
+                </div>
+                <div class="resource-card">
+                    <h3>🔐 SSSD Project</h3>
+                    <p><a href="https://sssd.io/" target="_blank">Official SSSD Documentation</a></p>
+                </div>
+                <div class="resource-card">
+                    <h3>💬 Community Support</h3>
+                    <p><a href="https://www.reddit.com/r/linuxadmin/" target="_blank">Linux Admin Community</a></p>
+                </div>
+            </div>
+
+            <p style="margin-top: 40px; opacity: 0.8;">
+                Created with ❤️ for Linux System Administrators
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const subsection = header.parentElement;
+            subsection.classList.toggle('collapsed');
+        }
+
+        function copyCode(button) {
+            const pre = button.parentElement;
+            const code = pre.querySelector('code');
+            const text = code.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Initialize all sections as expanded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Linux Domain Join Guide loaded successfully!');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confluence Installation Guide - Oracle Linux</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #0052CC;
+            --secondary-color: #172B4D;
+            --success-color: #36B37E;
+            --warning-color: #FFAB00;
+            --danger-color: #DE350B;
+            --light-bg: #F4F5F7;
+            --dark-bg: #091E42;
+            --border-color: #DFE1E6;
+            --text-color: #172B4D;
+            --code-bg: #F4F5F7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background-color: var(--light-bg);
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 100px;
+            z-index: 999;
+        }
+
+        .progress-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: sticky;
+            top: 180px;
+            height: fit-content;
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .sidebar h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.5rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            background-color: white;
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .nav-link.completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        /* Main Content */
+        .content {
+            background-color: white;
+        }
+
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .section h2 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary-color);
+            font-size: 1.8rem;
+        }
+
+        .section h3 {
+            color: var(--secondary-color);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .section h4 {
+            color: var(--text-color);
+            margin-top: 1rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .checklist-item {
+            background-color: var(--light-bg);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--border-color);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .checklist-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateX(4px);
+        }
+
+        .checklist-item.completed {
+            background-color: #E3FCEF;
+            border-left-color: var(--success-color);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-right: 0.75rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success-color);
+        }
+
+        .checklist-item label {
+            cursor: pointer;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .checklist-item-content {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-language {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .copy-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background-color: var(--success-color);
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-color);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+
+        .info-box.info {
+            background-color: #E6F2FF;
+            border-left-color: var(--primary-color);
+        }
+
+        .info-box.warning {
+            background-color: #FFF4E6;
+            border-left-color: var(--warning-color);
+        }
+
+        .info-box.danger {
+            background-color: #FFEBE6;
+            border-left-color: var(--danger-color);
+        }
+
+        .info-box.success {
+            background-color: #E3FCEF;
+            border-left-color: var(--success-color);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-box-title::before {
+            content: "ℹ️";
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .info-box.warning .info-box-title::before {
+            content: "⚠️";
+        }
+
+        .info-box.danger .info-box-title::before {
+            content: "🚫";
+        }
+
+        .info-box.success .info-box-title::before {
+            content: "✅";
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: var(--light-bg);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #2a9566;
+        }
+
+        .btn-secondary {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        /* Collapsible Sections */
+        .collapsible {
+            background-color: var(--light-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .collapsible:hover {
+            background-color: #e8e9ed;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .collapsible-icon {
+            transition: transform 0.3s;
+        }
+
+        .collapsible.active .collapsible-icon {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-top: 0;
+        }
+
+        .collapsible.active .collapsible-content {
+            max-height: 2000px;
+            padding-top: 1rem;
+        }
+
+        /* Search Box */
+        .search-container {
+            margin-bottom: 1rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--dark-bg);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .sidebar, .progress-container, .copy-btn {
+                display: none;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-required {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .badge-optional {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .badge-recommended {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        /* Action Buttons Container */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        /* Stats Dashboard */
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 0;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--primary-color);
+        }
+
+        .timeline-item.completed::before {
+            background-color: var(--success-color);
+            box-shadow: 0 0 0 3px var(--success-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>🚀 Confluence Installation Guide for Oracle Linux</h1>
+            <p>Complete Best Practice Guide with Interactive Checklist</p>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="progressText">Progress: 0%</span>
+                <span id="completedTasks">0 of 0 tasks completed</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h3>📋 Table of Contents</h3>
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search sections...">
+            </div>
+            <ul class="nav-list" id="navList">
+                <li class="nav-item"><a href="#overview" class="nav-link">Overview</a></li>
+                <li class="nav-item"><a href="#requirements" class="nav-link">System Requirements</a></li>
+                <li class="nav-item"><a href="#prerequisites" class="nav-link">Prerequisites</a></li>
+                <li class="nav-item"><a href="#database" class="nav-link">Database Setup</a></li>
+                <li class="nav-item"><a href="#installation" class="nav-link">Installation</a></li>
+                <li class="nav-item"><a href="#configuration" class="nav-link">Configuration</a></li>
+                <li class="nav-item"><a href="#reverse-proxy" class="nav-link">Reverse Proxy</a></li>
+                <li class="nav-item"><a href="#security" class="nav-link">Security Hardening</a></li>
+                <li class="nav-item"><a href="#backup" class="nav-link">Backup & Recovery</a></li>
+                <li class="nav-item"><a href="#monitoring" class="nav-link">Monitoring</a></li>
+                <li class="nav-item"><a href="#troubleshooting" class="nav-link">Troubleshooting</a></li>
+            </ul>
+            
+            <div class="action-buttons" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="expandAll()">Expand All</button>
+                <button class="btn btn-secondary" onclick="collapseAll()">Collapse All</button>
+                <button class="btn btn-success" onclick="exportProgress()">Export Progress</button>
+                <button class="btn btn-secondary" onclick="resetProgress()">Reset</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Overview Section -->
+            <section id="overview" class="section">
+                <h2>📖 Overview</h2>
+                
+                <div class="stats-dashboard">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalSections">11</div>
+                        <div class="stat-label">Total Sections</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalTasks">0</div>
+                        <div class="stat-label">Total Tasks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="estimatedTime">4-6</div>
+                        <div class="stat-label">Hours (Est.)</div>
+                    </div>
+                </div>
+
+                <p>This comprehensive guide provides step-by-step instructions for installing and configuring Atlassian Confluence on Oracle Linux. It follows industry best practices for production environments.</p>
+
+                <div class="info-box info">
+                    <div class="info-box-title">What You'll Learn</div>
+                    <ul>
+                        <li>System preparation and prerequisites</li>
+                        <li>Database installation and configuration</li>
+                        <li>Confluence installation and setup</li>
+                        <li>Security hardening and best practices</li>
+                        <li>Backup and disaster recovery procedures</li>
+                        <li>Performance optimization and monitoring</li>
+                    </ul>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">Before You Begin</div>
+                    <p>Ensure you have:</p>
+                    <ul>
+                        <li>Root or sudo access to Oracle Linux server</li>
+                        <li>Basic Linux system administration knowledge</li>
+                        <li>Valid Confluence license or evaluation license</li>
+                        <li>Minimum 8GB RAM and 10GB disk space</li>
+                    </ul>
+                </div>
+
+                <h3>Installation Approach</h3>
+                <p>This guide focuses on production-ready installations using:</p>
+                <ul>
+                    <li><strong>External Database:</strong> PostgreSQL (recommended) or Oracle Database</li>
+                    <li><strong>Reverse Proxy:</strong> Nginx or Apache with SSL/TLS</li>
+                    <li><strong>Security:</strong> SELinux, firewall, and application hardening</li>
+                    <li><strong>Automation:</strong> Automated backups and monitoring</li>
+                </ul>
+            </section>
+
+            <!-- System Requirements -->
+            <section id="requirements" class="section">
+                <h2>💻 System Requirements</h2>
+
+                <h3>Hardware Requirements</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Minimum</th>
+                            <th>Recommended</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CPU</td>
+                            <td>2 cores</td>
+                            <td>4+ cores</td>
+                        </tr>
+                        <tr>
+                            <td>RAM</td>
+                            <td>8 GB</td>
+                            <td>16+ GB</td>
+                        </tr>
+                        <tr>
+                            <td>Disk Space</td>
+                            <td>10 GB</td>
+                            <td>50+ GB SSD</td>
+                        </tr>
+                        <tr>
+                            <td>Network</td>
+                            <td>100 Mbps</td>
+                            <td>1 Gbps</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Software Requirements</h3>
+                <ul class="checklist">
+                    <li class="checklist-item">
+                        <div class="checklist-item-content">
+                            <input type="checkbox" id="req-1">
+                            <label for="req-1">Oracle Linux 8.x or 9.x (64-bit)</label>
+                        </div>
+                    </li>
+                    <li class="checklist-item">
+                        <div class="checklist-item-content">
+                            <input type="checkbox" id="req-2">
+                            <label for="req-2">OpenJDK 11 or 17 (17 recommended)</label>
+                        </div>
+                    </li>
+                    <li class="checklist-item">
+                        <div class="checklist-item-content">
+                            <input type="checkbox" id="req-3">
+                            <label for="req-3">PostgreSQL 12+ or Oracle Database 19c+</label>
+                        </div>
+                    </li>
+                    <li class="checklist-item">
+                        <div class="checklist-item-content">
+                            <input type="checkbox" id="req-4">
+                            <label for="req-4">Root or sudo access</label>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="info-box info">
+                    <div class="info-box-title">Port Requirements</div>
+                    <ul>
+                        <li><strong>8090:</strong> Confluence HTTP (default)</li>
+                        <li><strong>8091:</strong> Confluence control/Synchrony</li>
+                        <li><strong>5432:</strong> PostgreSQL (if used)</li>
+                        <li><strong>443:</strong> HTTPS (reverse proxy)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Prerequisites -->
+            <section id="prerequisites" class="section">
+                <h2>🔧 Prerequisites and System Preparation</h2>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>1. System Updates</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-1">
+                                    <label for="prereq-1">Update all system packages</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Update all system packages
+sudo dnf update -y
+
+# Install essential tools
+sudo dnf install wget curl vim net-tools bind-utils -y
+
+# Reboot if kernel was updated
+sudo reboot</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>2. Java Installation <span class="badge badge-required">Required</span></span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-2">
+                                    <label for="prereq-2">Install OpenJDK 17</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-3">
+                                    <label for="prereq-3">Configure JAVA_HOME environment variable</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-4">
+                                    <label for="prereq-4">Verify Java installation</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Install OpenJDK 17
+sudo dnf install java-17-openjdk-devel -y
+
+# Set JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+
+# Make persistent
+echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk' | sudo tee /etc/profile.d/java.sh
+echo 'export PATH=$JAVA_HOME/bin:$PATH' | sudo tee -a /etc/profile.d/java.sh
+sudo chmod +x /etc/profile.d/java.sh
+source /etc/profile.d/java.sh
+
+# Verify installation
+java -version
+echo $JAVA_HOME</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>3. SELinux Configuration</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="info-box warning">
+                            <div class="info-box-title">Production vs Development</div>
+                            <p>For production, configure proper SELinux policies. For development/testing, you can temporarily disable SELinux.</p>
+                        </div>
+                        
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-5">
+                                    <label for="prereq-5">Configure SELinux policies for Confluence</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-6">
+                                    <label for="prereq-6">Allow required ports</label>
+                                </div>
+                            </li>
+                        </ul>
+                        
+                        <h4>Production Configuration:</h4>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Install SELinux tools
+sudo dnf install policycoreutils-python-utils -y
+
+# Allow Confluence ports
+sudo semanage port -a -t http_port_t -p tcp 8090
+sudo semanage port -a -t http_port_t -p tcp 8091
+
+# Set file contexts
+sudo semanage fcontext -a -t httpd_sys_content_t "/opt/atlassian/confluence(/.*)?"
+sudo semanage fcontext -a -t httpd_sys_rw_content_t "/var/atlassian/application-data/confluence(/.*)?"
+
+# Create directories
+sudo mkdir -p /opt/atlassian/confluence
+sudo mkdir -p /var/atlassian/application-data/confluence
+
+# Apply contexts
+sudo restorecon -Rv /opt/atlassian/confluence
+sudo restorecon -Rv /var/atlassian/application-data/confluence
+
+# Allow network connections
+sudo setsebool -P httpd_can_network_connect 1</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>4. Firewall Configuration <span class="badge badge-required">Required</span></span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-7">
+                                    <label for="prereq-7">Configure firewall rules</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="prereq-8">
+                                    <label for="prereq-8">Verify firewall settings</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Start and enable firewalld
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
+
+# Add Confluence ports
+sudo firewall-cmd --permanent --add-port=8090/tcp
+sudo firewall-cmd --permanent --add-port=8091/tcp
+
+# Add HTTP/HTTPS for reverse proxy
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+
+# Reload firewall
+sudo firewall-cmd --reload
+
+# Verify rules
+sudo firewall-cmd --list-all</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Setup -->
+            <section id="database" class="section">
+                <h2>🗄️ Database Installation and Configuration</h2>
+
+                <div class="info-box info">
+                    <div class="info-box-title">Database Choice</div>
+                    <p>PostgreSQL is recommended for most deployments due to its excellent performance, reliability, and ease of management.</p>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>1. Install PostgreSQL <span class="badge badge-recommended">Recommended</span></span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-1">
+                                    <label for="db-1">Install PostgreSQL server</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-2">
+                                    <label for="db-2">Initialize database cluster</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-3">
+                                    <label for="db-3">Start and enable PostgreSQL service</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Install PostgreSQL
+sudo dnf install postgresql-server postgresql-contrib -y
+
+# Initialize database
+sudo postgresql-setup --initdb
+
+# Start and enable service
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Verify status
+sudo systemctl status postgresql</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>2. Create Confluence Database</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-4">
+                                    <label for="db-4">Create database with proper encoding</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-5">
+                                    <label for="db-5">Create database user with secure password</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-6">
+                                    <label for="db-6">Grant necessary privileges</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Switch to postgres user and access psql
+sudo -u postgres psql
+
+# Execute in PostgreSQL prompt:
+CREATE DATABASE confluence 
+    WITH ENCODING 'UNICODE' 
+    LC_COLLATE 'C' 
+    LC_CTYPE 'C' 
+    TEMPLATE template0;
+
+CREATE USER confluenceuser WITH PASSWORD 'YourSecurePassword123!';
+
+GRANT ALL PRIVILEGES ON DATABASE confluence TO confluenceuser;
+
+ALTER DATABASE confluence OWNER TO confluenceuser;
+
+\c confluence
+GRANT ALL ON SCHEMA public TO confluenceuser;
+
+\q</code></pre>
+                        </div>
+                        <div class="info-box warning">
+                            <div class="info-box-title">Security Note</div>
+                            <p>Replace 'YourSecurePassword123!' with a strong, unique password. Store it securely.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>3. Configure PostgreSQL Authentication</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-7">
+                                    <label for="db-7">Edit pg_hba.conf for authentication</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-8">
+                                    <label for="db-8">Restart PostgreSQL</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Backup original configuration
+sudo cp /var/lib/pgsql/data/pg_hba.conf /var/lib/pgsql/data/pg_hba.conf.backup
+
+# Edit pg_hba.conf
+sudo vim /var/lib/pgsql/data/pg_hba.conf
+
+# Add these lines at the top:
+# host    confluence      confluenceuser  127.0.0.1/32    md5
+# host    confluence      confluenceuser  ::1/128         md5
+
+# Restart PostgreSQL
+sudo systemctl restart postgresql</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>4. Download PostgreSQL JDBC Driver</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="db-9">
+                                    <label for="db-9">Download JDBC driver</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Create temporary directory
+mkdir -p /tmp/confluence-jdbc
+cd /tmp/confluence-jdbc
+
+# Download latest PostgreSQL JDBC driver
+wget https://jdbc.postgresql.org/download/postgresql-42.7.1.jar
+
+# Verify download
+ls -lh postgresql-42.7.1.jar</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Confluence Installation -->
+            <section id="installation" class="section">
+                <h2>📦 Confluence Installation</h2>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h3>Step 1: Download Confluence</h3>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-1">
+                                    <label for="install-1">Download Confluence installer</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-2">
+                                    <label for="install-2">Make installer executable</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Create download directory
+mkdir -p ~/confluence-install
+cd ~/confluence-install
+
+# Download Confluence (replace X.X.X with actual version)
+CONFLUENCE_VERSION="8.5.4"
+wget https://www.atlassian.com/software/confluence/downloads/binary/atlassian-confluence-${CONFLUENCE_VERSION}-x64.bin
+
+# Make executable
+chmod +x atlassian-confluence-*.bin
+
+# Verify
+ls -lh atlassian-confluence-*.bin</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h3>Step 2: Run Installation Wizard</h3>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-3">
+                                    <label for="install-3">Run installer with sudo</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-4">
+                                    <label for="install-4">Choose Custom Install</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-5">
+                                    <label for="install-5">Set installation directory: /opt/atlassian/confluence</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-6">
+                                    <label for="install-6">Set home directory: /var/atlassian/application-data/confluence</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-7">
+                                    <label for="install-7">Configure ports (8090 HTTP, 8091 control)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-8">
+                                    <label for="install-8">Install as service</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-9">
+                                    <label for="install-9">Complete installation (don't start yet)</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Run installer
+sudo ./atlassian-confluence-8.5.4-x64.bin
+
+# Follow wizard prompts:
+# 1. Press Enter to continue
+# 2. Choose option 2 (Custom Install)
+# 3. Accept default installation path or customize
+# 4. Accept default home path or customize
+# 5. Set HTTP port (default: 8090)
+# 6. Set control port (default: 8091)
+# 7. Choose Yes to install as service
+# 8. Choose No to start now (we'll start after configuration)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h3>Step 3: Set Proper Permissions</h3>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-10">
+                                    <label for="install-10">Set ownership for installation directory</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-11">
+                                    <label for="install-11">Set ownership for home directory</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-12">
+                                    <label for="install-12">Secure configuration files</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Set ownership
+sudo chown -R confluence:confluence /opt/atlassian/confluence
+sudo chown -R confluence:confluence /var/atlassian/application-data/confluence
+
+# Set secure permissions
+sudo chmod 700 /var/atlassian/application-data/confluence
+sudo chmod 755 /opt/atlassian/confluence
+sudo chmod 600 /opt/atlassian/confluence/conf/server.xml
+sudo chmod 750 /opt/atlassian/confluence/bin/*.sh
+
+# Verify
+ls -la /opt/atlassian/confluence/
+ls -la /var/atlassian/application-data/confluence/</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h3>Step 4: Install Database Driver</h3>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-13">
+                                    <label for="install-13">Copy JDBC driver to Confluence lib directory</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-14">
+                                    <label for="install-14">Set proper permissions on driver</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Copy PostgreSQL JDBC driver
+sudo cp /tmp/confluence-jdbc/postgresql-42.7.1.jar \
+    /opt/atlassian/confluence/confluence/WEB-INF/lib/
+
+# Set ownership and permissions
+sudo chown confluence:confluence \
+    /opt/atlassian/confluence/confluence/WEB-INF/lib/postgresql-42.7.1.jar
+sudo chmod 644 \
+    /opt/atlassian/confluence/confluence/WEB-INF/lib/postgresql-42.7.1.jar
+
+# Verify
+ls -l /opt/atlassian/confluence/confluence/WEB-INF/lib/postgresql-*.jar</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h3>Step 5: Configure JVM Memory</h3>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-15">
+                                    <label for="install-15">Edit setenv.sh for memory settings</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="install-16">
+                                    <label for="install-16">Configure garbage collection</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Backup original
+sudo cp /opt/atlassian/confluence/bin/setenv.sh \
+    /opt/atlassian/confluence/bin/setenv.sh.backup
+
+# Edit setenv.sh
+sudo vim /opt/atlassian/confluence/bin/setenv.sh
+
+# Add these lines (adjust memory based on your system):
+# For 16GB RAM system (8GB for Confluence):
+CATALINA_OPTS="-Xms8192m -Xmx8192m ${CATALINA_OPTS}"
+CATALINA_OPTS="-XX:+UseG1GC ${CATALINA_OPTS}"
+CATALINA_OPTS="-XX:MaxGCPauseMillis=200 ${CATALINA_OPTS}"
+CATALINA_OPTS="-Dsynchrony.memory.max=2g ${CATALINA_OPTS}"
+CATALINA_OPTS="-Dfile.encoding=UTF-8 ${CATALINA_OPTS}"</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuration -->
+            <section id="configuration" class="section">
+                <h2>⚙️ Initial Configuration and Setup</h2>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>1. Start Confluence Service</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-1">
+                                    <label for="config-1">Start Confluence service</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-2">
+                                    <label for="config-2">Enable auto-start on boot</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-3">
+                                    <label for="config-3">Verify Confluence is running</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Start Confluence
+sudo systemctl start confluence
+
+# Enable auto-start
+sudo systemctl enable confluence
+
+# Check status
+sudo systemctl status confluence
+
+# Monitor startup logs
+sudo tail -f /var/atlassian/application-data/confluence/logs/catalina.out
+
+# Verify port is listening
+sudo netstat -tulpn | grep 8090</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>2. Web-Based Setup Wizard</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="info-box info">
+                            <div class="info-box-title">Access Setup Wizard</div>
+                            <p>Open your web browser and navigate to: <strong>http://your-server-ip:8090</strong></p>
+                        </div>
+
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-4">
+                                    <label for="config-4">Select language and choose "Production Installation"</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-5">
+                                    <label for="config-5">Enter Confluence license key (or get evaluation license)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-6">
+                                    <label for="config-6">Configure database connection (PostgreSQL)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-7">
+                                    <label for="config-7">Test database connection</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-8">
+                                    <label for="config-8">Wait for database initialization</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-9">
+                                    <label for="config-9">Choose content option (Empty Site recommended)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-10">
+                                    <label for="config-10">Select user management (Internal or LDAP)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-11">
+                                    <label for="config-11">Create administrator account</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-12">
+                                    <label for="config-12">Complete setup and verify login</label>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="info-box warning">
+                            <div class="info-box-title">Database Connection Details</div>
+                            <p><strong>For PostgreSQL (Simple):</strong></p>
+                            <ul>
+                                <li>Hostname: localhost</li>
+                                <li>Port: 5432</li>
+                                <li>Database: confluence</li>
+                                <li>Username: confluenceuser</li>
+                                <li>Password: [your secure password]</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>3. Configure Base URL</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="config-13">
+                                    <label for="config-13">Set server base URL in Confluence</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="info-box info">
+                            <div class="info-box-title">How to Configure</div>
+                            <ol>
+                                <li>Login as administrator</li>
+                                <li>Click Settings (gear icon) → General Configuration</li>
+                                <li>Find "Server Base URL" and click Edit</li>
+                                <li>Enter: https://confluence.yourdomain.com (or http://your-server-ip:8090)</li>
+                                <li>Click Save</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reverse Proxy -->
+            <section id="reverse-proxy" class="section">
+                <h2>🔒 Reverse Proxy Configuration (SSL/TLS)</h2>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">Production Requirement</div>
+                    <p>For production environments, always use a reverse proxy with SSL/TLS certificates. This provides encryption, security, and professional appearance.</p>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>Option 1: Nginx Reverse Proxy <span class="badge badge-recommended">Recommended</span></span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Step 1: Install Nginx</h4>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-1">
+                                    <label for="proxy-1">Install Nginx</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-2">
+                                    <label for="proxy-2">Start and enable Nginx</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Install Nginx
+sudo dnf install nginx -y
+
+# Start and enable
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+# Verify
+sudo systemctl status nginx</code></pre>
+                        </div>
+
+                        <h4>Step 2: Obtain SSL Certificate</h4>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-3">
+                                    <label for="proxy-3">Install Certbot for Let's Encrypt</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-4">
+                                    <label for="proxy-4">Obtain SSL certificate</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Install Certbot
+sudo dnf install certbot python3-certbot-nginx -y
+
+# Obtain certificate (replace with your domain)
+sudo certbot --nginx -d confluence.yourdomain.com
+
+# Follow prompts to complete certificate installation</code></pre>
+                        </div>
+
+                        <h4>Step 3: Configure Nginx</h4>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-5">
+                                    <label for="proxy-5">Create Nginx configuration file</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-6">
+                                    <label for="proxy-6">Test and reload Nginx</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Create configuration file
+sudo vim /etc/nginx/conf.d/confluence.conf</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">nginx</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>upstream confluence {
+    server 127.0.0.1:8090;
+}
+
+server {
+    listen 80;
+    server_name confluence.yourdomain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name confluence.yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/confluence.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/confluence.yourdomain.com/privkey.pem;
+    
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers off;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
+    client_max_body_size 100M;
+
+    location / {
+        proxy_pass http://confluence;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_redirect off;
+        
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        proxy_connect_timeout 300;
+        proxy_send_timeout 300;
+        proxy_read_timeout 300;
+    }
+
+    location /synchrony {
+        proxy_pass http://127.0.0.1:8091/synchrony;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 300;
+    }
+}</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Test configuration
+sudo nginx -t
+
+# Reload Nginx
+sudo systemctl reload nginx</code></pre>
+                        </div>
+
+                        <h4>Step 4: Update Confluence Configuration</h4>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-7">
+                                    <label for="proxy-7">Update server.xml for reverse proxy</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-8">
+                                    <label for="proxy-8">Restart Confluence</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Stop Confluence
+sudo systemctl stop confluence
+
+# Edit server.xml
+sudo vim /opt/atlassian/confluence/conf/server.xml
+
+# Update Connector element to include:
+# scheme="https"
+# proxyName="confluence.yourdomain.com"
+# proxyPort="443"
+# secure="true"
+
+# Start Confluence
+sudo systemctl start confluence</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>Option 2: Apache HTTP Server</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-9">
+                                    <label for="proxy-9">Install Apache and mod_ssl</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-10">
+                                    <label for="proxy-10">Configure Apache virtual host</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-11">
+                                    <label for="proxy-11">Enable required modules</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="proxy-12">
+                                    <label for="proxy-12">Restart Apache</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Install Apache
+sudo dnf install httpd mod_ssl -y
+
+# Start and enable
+sudo systemctl start httpd
+sudo systemctl enable httpd
+
+# Create configuration
+sudo vim /etc/httpd/conf.d/confluence.conf
+
+# Test and restart
+sudo apachectl configtest
+sudo systemctl restart httpd</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Hardening -->
+            <section id="security" class="section">
+                <h2>🛡️ Security Hardening</h2>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">Critical for Production</div>
+                    <p>Security hardening is essential for production environments. Complete all tasks in this section.</p>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>1. System User Security</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-1">
+                                    <label for="security-1">Disable login shell for confluence user</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-2">
+                                    <label for="security-2">Lock confluence user account</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Disable login shell
+sudo usermod -s /sbin/nologin confluence
+
+# Lock account
+sudo passwd -l confluence
+
+# Verify
+getent passwd confluence
+sudo passwd -S confluence</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>2. File System Security</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-3">
+                                    <label for="security-3">Set restrictive permissions on configuration files</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-4">
+                                    <label for="security-4">Protect sensitive directories</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Secure configuration files
+sudo chmod 600 /opt/atlassian/confluence/conf/server.xml
+sudo chmod 600 /var/atlassian/application-data/confluence/confluence.cfg.xml
+
+# Secure directories
+sudo chmod 700 /var/atlassian/application-data/confluence
+sudo chmod 750 /opt/atlassian/confluence
+
+# Verify
+ls -la /opt/atlassian/confluence/conf/
+ls -la /var/atlassian/application-data/confluence/</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>3. Network Security</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-5">
+                                    <label for="security-5">Block direct access to Confluence ports</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-6">
+                                    <label for="security-6">Allow only reverse proxy access</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Remove direct access to Confluence ports
+sudo firewall-cmd --permanent --remove-port=8090/tcp
+sudo firewall-cmd --permanent --remove-port=8091/tcp
+
+# Ensure HTTP/HTTPS are allowed
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+
+# Reload
+sudo firewall-cmd --reload
+
+# Verify
+sudo firewall-cmd --list-all</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>4. Application Security Settings</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-7">
+                                    <label for="security-7">Enable XSRF protection</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-8">
+                                    <label for="security-8">Configure password policy</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-9">
+                                    <label for="security-9">Enable two-factor authentication (optional)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-10">
+                                    <label for="security-10">Disable anonymous access (if not needed)</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="info-box info">
+                            <div class="info-box-title">Configure Through Web Interface</div>
+                            <ol>
+                                <li>Login as administrator</li>
+                                <li>Navigate to Settings → Security Configuration</li>
+                                <li>Enable required security features</li>
+                                <li>Configure password policy requirements</li>
+                                <li>Set session timeout (recommended: 30 minutes)</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>5. Database Security</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-11">
+                                    <label for="security-11">Restrict database to localhost only</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-12">
+                                    <label for="security-12">Enable SSL for database connections</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="security-13">
+                                    <label for="security-13">Set up regular password rotation</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Backup and Recovery -->
+            <section id="backup" class="section">
+                <h2>💾 Backup and Recovery</h2>
+
+                <div class="info-box success">
+                    <div class="info-box-title">Backup Strategy</div>
+                    <p>A comprehensive backup strategy includes:</p>
+                    <ul>
+                        <li><strong>Home Directory:</strong> Attachments, configurations, indexes</li>
+                        <li><strong>Database:</strong> All content and metadata</li>
+                        <li><strong>Frequency:</strong> Daily automated backups</li>
+                        <li><strong>Retention:</strong> Keep 7 days of backups</li>
+                    </ul>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>1. Home Directory Backup Script</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-1">
+                                    <label for="backup-1">Create backup directory</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-2">
+                                    <label for="backup-2">Create home directory backup script</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-3">
+                                    <label for="backup-3">Make script executable</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-4">
+                                    <label for="backup-4">Test backup script</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Create backup directory
+sudo mkdir -p /backup/confluence/home
+
+# Create backup script
+sudo vim /usr/local/bin/backup-confluence-home.sh</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>#!/bin/bash
+# Confluence Home Directory Backup Script
+
+BACKUP_DIR="/backup/confluence/home"
+CONFLUENCE_HOME="/var/atlassian/application-data/confluence"
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="confluence-home-${DATE}.tar.gz"
+RETENTION_DAYS=7
+
+echo "Starting backup at $(date)"
+
+# Create backup
+tar -czf ${BACKUP_DIR}/${BACKUP_FILE} \
+    -C $(dirname ${CONFLUENCE_HOME}) \
+    $(basename ${CONFLUENCE_HOME})
+
+if [ $? -eq 0 ]; then
+    echo "Backup successful: ${BACKUP_FILE}"
+    # Remove old backups
+    find ${BACKUP_DIR} -name "confluence-home-*.tar.gz" \
+        -mtime +${RETENTION_DAYS} -delete
+else
+    echo "Backup failed!"
+    exit 1
+fi
+
+echo "Backup completed at $(date)"</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Make executable
+sudo chmod +x /usr/local/bin/backup-confluence-home.sh
+
+# Test backup
+sudo /usr/local/bin/backup-confluence-home.sh</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>2. Database Backup Script</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-5">
+                                    <label for="backup-5">Create .pgpass file for authentication</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-6">
+                                    <label for="backup-6">Create database backup script</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-7">
+                                    <label for="backup-7">Test database backup</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Create .pgpass file
+sudo vim /root/.pgpass
+
+# Add this line (replace password):
+# localhost:5432:confluence:confluenceuser:YourSecurePassword123!
+
+# Secure the file
+sudo chmod 600 /root/.pgpass
+
+# Create backup directory
+sudo mkdir -p /backup/confluence/database
+
+# Create backup script
+sudo vim /usr/local/bin/backup-confluence-db.sh</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code>#!/bin/bash
+# Confluence Database Backup Script
+
+BACKUP_DIR="/backup/confluence/database"
+DB_NAME="confluence"
+DB_USER="confluenceuser"
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="confluence-db-${DATE}"
+RETENTION_DAYS=7
+
+echo "Starting database backup at $(date)"
+
+# Backup database
+pg_dump -h localhost \
+    -U ${DB_USER} \
+    -d ${DB_NAME} \
+    -F c \
+    -b \
+    -v \
+    -f ${BACKUP_DIR}/${BACKUP_FILE}.backup
+
+if [ $? -eq 0 ]; then
+    echo "Database backup successful"
+    gzip ${BACKUP_DIR}/${BACKUP_FILE}.backup
+    # Remove old backups
+    find ${BACKUP_DIR} -name "confluence-db-*.backup.gz" \
+        -mtime +${RETENTION_DAYS} -delete
+else
+    echo "Database backup failed!"
+    exit 1
+fi
+
+echo "Database backup completed at $(date)"</code></pre>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Make executable
+sudo chmod +x /usr/local/bin/backup-confluence-db.sh
+
+# Test backup
+sudo /usr/local/bin/backup-confluence-db.sh</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>3. Automated Backups with Cron</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-8">
+                                    <label for="backup-8">Configure cron jobs for automated backups</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-9">
+                                    <label for="backup-9">Verify cron jobs are running</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Edit root crontab
+sudo crontab -e
+
+# Add these lines:
+# Daily home backup at 2:00 AM
+0 2 * * * /usr/local/bin/backup-confluence-home.sh >> /var/log/confluence-home-backup.log 2>&1
+
+# Daily database backup at 2:30 AM
+30 2 * * * /usr/local/bin/backup-confluence-db.sh >> /var/log/confluence-db-backup.log 2>&1
+
+# Verify cron jobs
+sudo crontab -l</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>4. Disaster Recovery Procedure</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="info-box warning">
+                            <div class="info-box-title">Recovery Steps</div>
+                            <ol>
+                                <li>Stop Confluence service</li>
+                                <li>Restore database from backup</li>
+                                <li>Restore home directory from backup</li>
+                                <li>Verify file permissions</li>
+                                <li>Start Confluence and verify</li>
+                            </ol>
+                        </div>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-10">
+                                    <label for="backup-10">Test disaster recovery procedure</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="backup-11">
+                                    <label for="backup-11">Document recovery procedure</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Monitoring -->
+            <section id="monitoring" class="section">
+                <h2>📊 Monitoring and Maintenance</h2>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>1. Log Management</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-1">
+                                    <label for="monitor-1">Configure log rotation</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-2">
+                                    <label for="monitor-2">Set up log monitoring</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="info-box info">
+                            <div class="info-box-title">Important Log Files</div>
+                            <ul>
+                                <li><code>/var/atlassian/application-data/confluence/logs/catalina.out</code> - Main application log</li>
+                                <li><code>/var/atlassian/application-data/confluence/logs/atlassian-confluence.log</code> - Confluence events</li>
+                                <li><code>/var/atlassian/application-data/confluence/logs/atlassian-synchrony.log</code> - Collaborative editing</li>
+                            </ul>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Configure logrotate
+sudo vim /etc/logrotate.d/confluence
+
+# Add configuration:
+/var/atlassian/application-data/confluence/logs/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 confluence confluence
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>2. Performance Monitoring</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-3">
+                                    <label for="monitor-3">Monitor system resources (CPU, RAM, Disk)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-4">
+                                    <label for="monitor-4">Monitor Confluence response time</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-5">
+                                    <label for="monitor-5">Monitor database connections</label>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Check system resources
+top
+htop
+free -h
+df -h
+
+# Check Confluence process
+ps aux | grep confluence
+
+# Check response time
+curl -o /dev/null -s -w 'Time: %{time_total}s\n' http://localhost:8090
+
+# Check database connections
+sudo -u postgres psql -d confluence -c "SELECT count(*) FROM pg_stat_activity WHERE datname='confluence';"</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>3. Regular Maintenance Tasks</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Weekly Tasks:</h4>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-6">
+                                    <label for="monitor-6">Review system logs for errors</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-7">
+                                    <label for="monitor-7">Check disk space usage</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-8">
+                                    <label for="monitor-8">Verify backup completion</label>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <h4>Monthly Tasks:</h4>
+                        <ul class="checklist">
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-9">
+                                    <label for="monitor-9">Database optimization (VACUUM, ANALYZE)</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-10">
+                                    <label for="monitor-10">Review and archive old content</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-11">
+                                    <label for="monitor-11">Check for Confluence updates</label>
+                                </div>
+                            </li>
+                            <li class="checklist-item">
+                                <div class="checklist-item-content">
+                                    <input type="checkbox" id="monitor-12">
+                                    <label for="monitor-12">Security audit and vulnerability scan</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section id="troubleshooting" class="section">
+                <h2>🔍 Troubleshooting</h2>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>Common Issue: Confluence Won't Start</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Symptoms:</h4>
+                        <ul>
+                            <li>Service fails to start</li>
+                            <li>Port 8090 not listening</li>
+                            <li>Errors in catalina.out</li>
+                        </ul>
+
+                        <h4>Troubleshooting Steps:</h4>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Check service status
+sudo systemctl status confluence
+
+# Check logs
+sudo tail -100 /var/atlassian/application-data/confluence/logs/catalina.out
+
+# Check if port is in use
+sudo netstat -tulpn | grep 8090
+
+# Verify Java installation
+java -version
+echo $JAVA_HOME
+
+# Check file permissions
+ls -la /var/atlassian/application-data/confluence
+ls -la /opt/atlassian/confluence
+
+# Check disk space
+df -h</code></pre>
+                        </div>
+
+                        <h4>Common Solutions:</h4>
+                        <ul>
+                            <li>Verify JAVA_HOME is set correctly</li>
+                            <li>Ensure sufficient disk space</li>
+                            <li>Check file permissions</li>
+                            <li>Verify database connectivity</li>
+                            <li>Check for port conflicts</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>Common Issue: Out of Memory Errors</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Symptoms:</h4>
+                        <ul>
+                            <li>OutOfMemoryError in logs</li>
+                            <li>Confluence becomes unresponsive</li>
+                            <li>Slow performance</li>
+                        </ul>
+
+                        <h4>Troubleshooting Steps:</h4>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Check current memory settings
+grep Xmx /opt/atlassian/confluence/bin/setenv.sh
+
+# Check system memory
+free -h
+
+# Check Java memory usage
+ps aux --sort=-%mem | grep confluence
+
+# Increase heap size in setenv.sh
+sudo vim /opt/atlassian/confluence/bin/setenv.sh
+# Modify -Xms and -Xmx values
+
+# Restart Confluence
+sudo systemctl restart confluence</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>Common Issue: Database Connection Errors</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Symptoms:</h4>
+                        <ul>
+                            <li>Cannot connect to database</li>
+                            <li>SQL exceptions in logs</li>
+                            <li>Confluence startup fails</li>
+                        </ul>
+
+                        <h4>Troubleshooting Steps:</h4>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Test database connectivity
+psql -h localhost -U confluenceuser -d confluence
+
+# Check PostgreSQL status
+sudo systemctl status postgresql
+
+# Review PostgreSQL logs
+sudo tail -50 /var/lib/pgsql/data/log/postgresql-*.log
+
+# Check connection limits
+sudo -u postgres psql -c "SHOW max_connections;"
+sudo -u postgres psql -c "SELECT count(*) FROM pg_stat_activity;"
+
+# Verify JDBC driver
+ls -la /opt/atlassian/confluence/confluence/WEB-INF/lib/postgresql*.jar
+
+# Check database credentials in confluence.cfg.xml
+sudo cat /var/atlassian/application-data/confluence/confluence.cfg.xml</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header">
+                        <span>Common Issue: Performance Problems</span>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Symptoms:</h4>
+                        <ul>
+                            <li>Slow page loads</li>
+                            <li>High CPU usage</li>
+                            <li>Slow search results</li>
+                        </ul>
+
+                        <h4>Troubleshooting Steps:</h4>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">bash</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code># Check system resources
+top
+iostat -x 5
+
+# Check database performance
+sudo -u postgres psql -d confluence -c "SELECT * FROM pg_stat_activity WHERE state = 'active';"
+
+# Optimize database
+sudo -u postgres psql -d confluence -c "VACUUM ANALYZE;"
+
+# Rebuild search index (through web UI)
+# Settings → General Configuration → Content Indexing → Rebuild Index
+
+# Check for plugin issues
+# Settings → Manage Apps → Review installed plugins</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box info">
+                    <div class="info-box-title">Additional Resources</div>
+                    <ul>
+                        <li><strong>Atlassian Documentation:</strong> <a href="https://confluence.atlassian.com/doc/" target="_blank">https://confluence.atlassian.com/doc/</a></li>
+                        <li><strong>Community Forum:</strong> <a href="https://community.atlassian.com/" target="_blank">https://community.atlassian.com/</a></li>
+                        <li><strong>Support Portal:</strong> <a href="https://support.atlassian.com/" target="_blank">https://support.atlassian.com/</a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Completion Section -->
+            <section class="section" style="background: linear-gradient(135deg, var(--success-color), #2a9566); color: white;">
+                <h2 style="color: white; border-bottom-color: white;">🎉 Installation Complete!</h2>
+                <p style="font-size: 1.2rem;">Congratulations! You have successfully installed and configured Confluence on Oracle Linux.</p>
+                
+                <h3 style="color: white; margin-top: 2rem;">Next Steps:</h3>
+                <ul style="font-size: 1.1rem;">
+                    <li>Access Confluence at your configured URL</li>
+                    <li>Create your first space and pages</li>
+                    <li>Configure user directories (LDAP if needed)</li>
+                    <li>Install additional plugins from Marketplace</li>
+                    <li>Set up regular backup verification</li>
+                    <li>Configure monitoring and alerting</li>
+                </ul>
+
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="window.print()" style="background-color: white; color: var(--success-color);">
+                        Print This Guide
+                    </button>
+                    <button class="btn btn-primary" onclick="exportProgress()" style="background-color: white; color: var(--success-color);">
+                        Export Progress
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Confluence Installation Guide for Oracle Linux</p>
+        <p>Best Practices | Production Ready | Security Hardened</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">
+            This guide is provided as-is for educational and professional purposes.<br>
+            Always refer to official Atlassian documentation for the latest information.
+        </p>
+    </footer>
+
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCheckboxes();
+            initializeCollapsibles();
+            initializeNavigation();
+            initializeSearch();
+            updateProgress();
+            countTotalTasks();
+        });
+
+        // Initialize checkboxes
+        function initializeCheckboxes() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            
+            // Load saved state from localStorage
+            checkboxes.forEach(checkbox => {
+                const savedState = localStorage.getItem(checkbox.id);
+                if (savedState === 'true') {
+                    checkbox.checked = true;
+                    checkbox.closest('.checklist-item').classList.add('completed');
+                }
+                
+                // Add change event listener
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        this.closest('.checklist-item').classList.add('completed');
+                        localStorage.setItem(this.id, 'true');
+                    } else {
+                        this.closest('.checklist-item').classList.remove('completed');
+                        localStorage.setItem(this.id, 'false');
+                    }
+                    updateProgress();
+                    updateNavigation();
+                });
+            });
+        }
+
+        // Initialize collapsible sections
+        function initializeCollapsibles() {
+            const collapsibles = document.querySelectorAll('.collapsible');
+            
+            collapsibles.forEach(collapsible => {
+                collapsible.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+        }
+
+        // Initialize navigation
+        function initializeNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.section');
+            
+            // Smooth scrolling
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    
+                    // Update active link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Highlight current section on scroll
+            window.addEventListener('scroll', function() {
+                let current = '';
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= (sectionTop - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+            
+            updateNavigation();
+        }
+
+        // Update navigation with completion status
+        function updateNavigation() {
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach(section => {
+                const sectionId = section.getAttribute('id');
+                const checkboxes = section.querySelectorAll('.checklist-item input[type="checkbox"]');
+                const checkedBoxes = section.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
+                
+                const navLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+                
+                if (navLink && checkboxes.length > 0) {
+                    if (checkedBoxes.length === checkboxes.length) {
+                        navLink.classList.add('completed');
+                    } else {
+                        navLink.classList.remove('completed');
+                    }
+                }
+            });
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const totalCheckboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]').length;
+            const checkedCheckboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked').length;
+            
+            const percentage = totalCheckboxes > 0 ? Math.round((checkedCheckboxes / totalCheckboxes) * 100) : 0;
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = 'Progress: ' + percentage + '%';
+            document.getElementById('completedTasks').textContent = checkedCheckboxes + ' of ' + totalCheckboxes + ' tasks completed';
+        }
+
+        // Count total tasks
+        function countTotalTasks() {
+            const totalTasks = document.querySelectorAll('.checklist-item input[type="checkbox"]').length;
+            document.getElementById('totalTasks').textContent = totalTasks;
+        }
+
+        // Copy code to clipboard
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const code = codeBlock.querySelector('pre code').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                button.textContent = 'Failed';
+            });
+        }
+
+        // Search functionality
+        function initializeSearch() {
+            const searchBox = document.getElementById('searchBox');
+            
+            searchBox.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const sections = document.querySelectorAll('.section');
+                
+                sections.forEach(section => {
+                    const sectionText = section.textContent.toLowerCase();
+                    const sectionId = section.getAttribute('id');
+                    const navLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+                    
+                    if (sectionText.includes(searchTerm) || searchTerm === '') {
+                        section.style.display = 'block';
+                        if (navLink) navLink.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                        if (navLink) navLink.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Expand all collapsibles
+        function expandAll() {
+            const collapsibles = document.querySelectorAll('.collapsible');
+            collapsibles.forEach(collapsible => {
+                collapsible.classList.add('active');
+            });
+        }
+
+        // Collapse all collapsibles
+        function collapseAll() {
+            const collapsibles = document.querySelectorAll('.collapsible');
+            collapsibles.forEach(collapsible => {
+                collapsible.classList.remove('active');
+            });
+        }
+
+        // Export progress
+        function exportProgress() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            const progress = {
+                date: new Date().toISOString(),
+                totalTasks: checkboxes.length,
+                completedTasks: 0,
+                tasks: []
+            };
+            
+            checkboxes.forEach(checkbox => {
+                const label = checkbox.nextElementSibling.textContent;
+                const checked = checkbox.checked;
+                
+                if (checked) progress.completedTasks++;
+                
+                progress.tasks.push({
+                    id: checkbox.id,
+                    label: label,
+                    completed: checked
+                });
+            });
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(progress, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "confluence-installation-progress.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            
+            alert('Progress exported successfully!');
+        }
+
+        // Reset progress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.closest('.checklist-item').classList.remove('completed');
+                    localStorage.removeItem(checkbox.id);
+                });
+                updateProgress();
+                updateNavigation();
+                alert('Progress has been reset!');
+            }
+        }
+    </script>
+</body>
+</html>
